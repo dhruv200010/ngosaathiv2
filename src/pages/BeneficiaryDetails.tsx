@@ -16,22 +16,22 @@ import { PlusCircle, Trash2, UserPlus, Upload, Plus, Image } from "lucide-react"
 import { toast } from "@/lib/toast";
 import { Card, CardContent } from "@/components/ui/card";
 
-type Document = {
+type AdditionalDocument = {
   id: string;
-  type: string;
+  type: "aadhar" | "pan" | "dl" | "election";
   number: string;
   photo: string | null;
 };
 
-// Update Beneficiary interface to include documents array
 const BeneficiaryDetails = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { formState, saveActivity, addBeneficiaryToTemp, updateBeneficiaryInTemp, removeBeneficiaryFromTemp } = useNGO();
   const { tempActivity } = formState;
-  const [beneficiaryDocs, setBeneficiaryDocs] = useState<Record<string, Document[]>>({});
+  const [beneficiaryDocs, setBeneficiaryDocs] = useState<Record<string, AdditionalDocument[]>>({});
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const docInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const docPhotoRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const genderOptions = [
     { value: "female", label: t("female") },
@@ -77,8 +77,10 @@ const BeneficiaryDetails = () => {
     fileInputRefs.current[benId]?.click();
   };
 
-  const triggerDocInput = (docId: string) => {
-    docInputRefs.current[docId]?.click();
+  const triggerDocInput = (id: string, type: "photo") => {
+    if (type === "photo") {
+      docPhotoRefs.current[id]?.click();
+    }
   };
 
   const handleSave = () => {
@@ -122,7 +124,7 @@ const BeneficiaryDetails = () => {
     });
   };
 
-  const updateDocument = (benId: string, docId: string, updates: Partial<Document>) => {
+  const updateDocument = (benId: string, docId: string, updates: Partial<AdditionalDocument>) => {
     const currentDocs = beneficiaryDocs[benId] || [];
     const updatedDocs = currentDocs.map(doc => 
       doc.id === docId ? { ...doc, ...updates } : doc
@@ -365,10 +367,10 @@ const BeneficiaryDetails = () => {
                               </Button>
                             </div>
                             
-                            {/* Default Document */}
+                            {/* Main Document Fields */}
                             <Card className="border border-gray-200">
                               <CardContent className="p-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                   <div>
                                     <Label>{t("documentType")}</Label>
                                     <Select
@@ -399,7 +401,62 @@ const BeneficiaryDetails = () => {
                                       placeholder={t("documentNumber")}
                                     />
                                   </div>
+                                  <div>
+                                    <Label>{t("documentPhoto")}</Label>
+                                    <input
+                                      type="file"
+                                      id={`doc-photo-main-${ben.id}`}
+                                      ref={(el) => (docPhotoRefs.current[`main-${ben.id}`] = el)}
+                                      className="hidden"
+                                      accept="image/*"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onload = (event) => {
+                                            if (event.target?.result) {
+                                              updateBeneficiaryInTemp(ben.id, { 
+                                                photo: event.target.result as string 
+                                              });
+                                            }
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                    />
+                                    <div 
+                                      className="border border-dashed border-gray-300 rounded-lg p-2 h-10 flex items-center justify-center cursor-pointer hover:border-ngo-green"
+                                      onClick={() => triggerDocInput(`main-${ben.id}`, "photo")}
+                                    >
+                                      {ben.photo ? (
+                                        <div className="flex items-center">
+                                          <div className="w-6 h-6 mr-2 overflow-hidden rounded">
+                                            <img src={ben.photo} alt="Doc" className="w-full h-full object-cover"/>
+                                          </div>
+                                          <span className="text-xs truncate">{t("photoUploaded")}</span>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center">
+                                          <Image size={14} className="mr-1 text-gray-400" />
+                                          <span className="text-xs text-gray-500">{t("uploadPhoto")}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
+                                
+                                {/* Document Photo Preview */}
+                                {ben.photo && (
+                                  <div className="mt-3">
+                                    <div className="relative w-24 h-24 mx-auto">
+                                      <img 
+                                        src={ben.photo} 
+                                        alt="Document" 
+                                        className="w-full h-full object-cover rounded-md border border-gray-200" 
+                                      />
+                                    </div>
+                                  </div>
+                                )}
                               </CardContent>
                             </Card>
                             
@@ -412,7 +469,9 @@ const BeneficiaryDetails = () => {
                                       <Label>{t("documentType")}</Label>
                                       <Select
                                         value={doc.type}
-                                        onValueChange={(value) => updateDocument(ben.id, doc.id, { type: value })}
+                                        onValueChange={(value) => updateDocument(ben.id, doc.id, { 
+                                          type: value as "aadhar" | "pan" | "dl" | "election" 
+                                        })}
                                       >
                                         <SelectTrigger>
                                           <SelectValue placeholder={t("documentType")} />
@@ -438,7 +497,9 @@ const BeneficiaryDetails = () => {
                                       <Label>{t("documentPhoto")}</Label>
                                       <div 
                                         className="border border-dashed border-gray-300 rounded-lg p-2 h-10 flex items-center justify-center cursor-pointer hover:border-ngo-green"
-                                        onClick={() => triggerDocInput(doc.id)}
+                                        onClick={() => {
+                                          docPhotoRefs.current[doc.id]?.click();
+                                        }}
                                       >
                                         {doc.photo ? (
                                           <div className="flex items-center">
@@ -456,7 +517,7 @@ const BeneficiaryDetails = () => {
                                       </div>
                                       <input
                                         type="file"
-                                        ref={(el) => (docInputRefs.current[doc.id] = el)}
+                                        ref={(el) => (docPhotoRefs.current[doc.id] = el)}
                                         className="hidden"
                                         accept="image/*"
                                         onChange={(e) => handleDocPhotoChange(e, ben.id, doc.id)}
@@ -475,7 +536,7 @@ const BeneficiaryDetails = () => {
                                   
                                   {/* Document Photo Preview */}
                                   {doc.photo && (
-                                    <div className="mt-2">
+                                    <div className="mt-3">
                                       <div className="relative w-24 h-24 mx-auto">
                                         <img 
                                           src={doc.photo} 
