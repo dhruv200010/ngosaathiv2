@@ -37,6 +37,7 @@ export interface Document {
   fileName: string;
   type: "bill" | "receipt" | "invoice" | "cashVoucher" | "other";
   comment: string;
+  preview?: string; // Added preview field for document preview
 }
 
 export interface Beneficiary {

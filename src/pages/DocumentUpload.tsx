@@ -9,17 +9,16 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO, Document } from "@/context/NGOContext";
-import { File, PlusCircle, Trash2, Image } from "lucide-react";
+import { File, PlusCircle, Trash2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { Card, CardContent } from "@/components/ui/card";
 
 const DocumentUpload = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { formState, updateFormState, addDocumentToTemp, updateDocumentInTemp, removeDocumentFromTemp, updateTempActivity } = useNGO();
+  const { formState, updateFormState, addDocumentToTemp, updateDocumentInTemp, removeDocumentFromTemp } = useNGO();
   const { tempActivity } = formState;
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
   const documentTypeOptions = [
     { value: "bill", label: t("bill") },
@@ -40,43 +39,16 @@ const DocumentUpload = () => {
       reader.onload = (event) => {
         updateDocumentInTemp(docId, { 
           file, 
-          fileName: file.name 
+          fileName: file.name,
+          preview: event.target?.result as string
         });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newMediaUrls = [...tempActivity.media];
-      
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            newMediaUrls.push(event.target.result as string);
-            updateTempActivity({ media: newMediaUrls });
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  };
-
-  const removeMedia = (index: number) => {
-    const newMedia = [...tempActivity.media];
-    newMedia.splice(index, 1);
-    updateTempActivity({ media: newMedia });
-  };
-
   const triggerFileInput = (docId: string) => {
     fileInputRefs.current[docId]?.click();
-  };
-
-  const triggerMediaInput = () => {
-    mediaInputRef.current?.click();
   };
 
   const handleNext = () => {
@@ -87,6 +59,31 @@ const DocumentUpload = () => {
   const handleBack = () => {
     updateFormState({ currentStep: 1 });
     navigate("/activity/report");
+  };
+
+  // Function to render appropriate preview based on file type
+  const renderFilePreview = (doc: Document) => {
+    if (!doc.preview) return null;
+    
+    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.fileName);
+    
+    if (isImage) {
+      return (
+        <div className="mt-3 rounded-lg overflow-hidden border border-gray-200">
+          <img src={doc.preview} alt={doc.fileName} className="w-full h-auto max-h-48 object-contain" />
+        </div>
+      );
+    } else {
+      return (
+        <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-center">
+          <File size={24} className="text-gray-500 mr-2" />
+          <span className="text-sm text-gray-700 truncate flex-1">{doc.fileName}</span>
+          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+            {doc.fileName.split('.').pop()?.toUpperCase()}
+          </span>
+        </div>
+      );
+    }
   };
 
   return (
@@ -187,67 +184,10 @@ const DocumentUpload = () => {
                       </div>
                       
                       {/* Document Preview */}
-                      {doc.fileName && (
-                        <div className="mt-3 px-2">
-                          <div className="flex items-center p-2 bg-gray-50 rounded-lg">
-                            <File size={18} className="text-gray-500 mr-2" />
-                            <span className="text-sm text-gray-700 truncate">{doc.fileName}</span>
-                          </div>
-                        </div>
-                      )}
+                      {doc.fileName && renderFilePreview(doc)}
                     </CardContent>
                   </Card>
                 ))
-              )}
-            </div>
-            
-            {/* Media Upload Section */}
-            <div className="space-y-4 pt-4 border-t">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-ngo-dark">{t("uploadMedia")}</h2>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={triggerMediaInput}
-                  className="flex items-center"
-                >
-                  <Image size={16} className="mr-2" />
-                  {t("add")}
-                </Button>
-                <input
-                  type="file"
-                  ref={mediaInputRef}
-                  className="hidden"
-                  accept="image/*,video/*"
-                  onChange={handleMediaUpload}
-                  multiple
-                />
-              </div>
-              
-              {/* Media Preview */}
-              {tempActivity.media.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                  {tempActivity.media.map((media, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden border border-gray-200">
-                        <img 
-                          src={media} 
-                          alt={`Media ${index + 1}`} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeMedia(index)}
-                      >
-                        <Trash2 size={12} />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
             
