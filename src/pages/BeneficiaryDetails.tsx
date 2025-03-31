@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,15 +12,26 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO, Beneficiary } from "@/context/NGOContext";
-import { PlusCircle, Trash2, UserPlus, Upload } from "lucide-react";
+import { PlusCircle, Trash2, UserPlus, Upload, Plus, Image } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { Card, CardContent } from "@/components/ui/card";
 
+type Document = {
+  id: string;
+  type: string;
+  number: string;
+  photo: string | null;
+};
+
+// Update Beneficiary interface to include documents array
 const BeneficiaryDetails = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { formState, saveActivity, addBeneficiaryToTemp, updateBeneficiaryInTemp, removeBeneficiaryFromTemp } = useNGO();
   const { tempActivity } = formState;
+  const [beneficiaryDocs, setBeneficiaryDocs] = useState<Record<string, Document[]>>({});
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const docInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const genderOptions = [
     { value: "female", label: t("female") },
@@ -65,6 +77,10 @@ const BeneficiaryDetails = () => {
     fileInputRefs.current[benId]?.click();
   };
 
+  const triggerDocInput = (docId: string) => {
+    docInputRefs.current[docId]?.click();
+  };
+
   const handleSave = () => {
     // Validation
     const isValid = tempActivity.beneficiaries.every(ben => ben.firstName.trim() !== "");
@@ -89,6 +105,58 @@ const BeneficiaryDetails = () => {
     if (ben.middleName) name += " " + ben.middleName;
     if (ben.lastName) name += " " + ben.lastName;
     return name;
+  };
+
+  const addDocumentToBeneficiary = (benId: string) => {
+    const currentDocs = beneficiaryDocs[benId] || [];
+    const newDoc = {
+      id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+      type: "aadhar",
+      number: "",
+      photo: null
+    };
+    
+    setBeneficiaryDocs({
+      ...beneficiaryDocs,
+      [benId]: [...currentDocs, newDoc]
+    });
+  };
+
+  const updateDocument = (benId: string, docId: string, updates: Partial<Document>) => {
+    const currentDocs = beneficiaryDocs[benId] || [];
+    const updatedDocs = currentDocs.map(doc => 
+      doc.id === docId ? { ...doc, ...updates } : doc
+    );
+    
+    setBeneficiaryDocs({
+      ...beneficiaryDocs,
+      [benId]: updatedDocs
+    });
+  };
+
+  const handleDocPhotoChange = (e: React.ChangeEvent<HTMLInputElement>, benId: string, docId: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          updateDocument(benId, docId, { 
+            photo: event.target.result as string 
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeDocument = (benId: string, docId: string) => {
+    const currentDocs = beneficiaryDocs[benId] || [];
+    const filteredDocs = currentDocs.filter(doc => doc.id !== docId);
+    
+    setBeneficiaryDocs({
+      ...beneficiaryDocs,
+      [benId]: filteredDocs
+    });
   };
 
   return (
@@ -281,38 +349,145 @@ const BeneficiaryDetails = () => {
                             />
                           </div>
                           
-                          {/* Document */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                              <Label>{t("documentType")}</Label>
-                              <Select
-                                value={ben.documentType}
-                                onValueChange={(value) => 
-                                  updateBeneficiaryInTemp(ben.id, { 
-                                    documentType: value as "aadhar" | "pan" | "dl" | "election" 
-                                  })
-                                }
+                          {/* Documents Section */}
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <Label className="text-base font-medium">{t("documents")}</Label>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => addDocumentToBeneficiary(ben.id)}
+                                className="flex items-center"
                               >
-                                <SelectTrigger>
-                                  <SelectValue placeholder={t("documentType")} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {documentTypeOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                <Plus size={14} className="mr-1" />
+                                {t("addDocument")}
+                              </Button>
                             </div>
-                            <div>
-                              <Label>{t("documentNumber")}</Label>
-                              <Input
-                                value={ben.documentNo}
-                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { documentNo: e.target.value })}
-                                placeholder={t("documentNumber")}
-                              />
-                            </div>
+                            
+                            {/* Default Document */}
+                            <Card className="border border-gray-200">
+                              <CardContent className="p-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>{t("documentType")}</Label>
+                                    <Select
+                                      value={ben.documentType}
+                                      onValueChange={(value) => 
+                                        updateBeneficiaryInTemp(ben.id, { 
+                                          documentType: value as "aadhar" | "pan" | "dl" | "election" 
+                                        })
+                                      }
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={t("documentType")} />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {documentTypeOptions.map((option) => (
+                                          <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label>{t("documentNumber")}</Label>
+                                    <Input
+                                      value={ben.documentNo}
+                                      onChange={(e) => updateBeneficiaryInTemp(ben.id, { documentNo: e.target.value })}
+                                      placeholder={t("documentNumber")}
+                                    />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            {/* Additional Documents */}
+                            {(beneficiaryDocs[ben.id] || []).map((doc) => (
+                              <Card key={doc.id} className="border border-gray-200">
+                                <CardContent className="p-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                      <Label>{t("documentType")}</Label>
+                                      <Select
+                                        value={doc.type}
+                                        onValueChange={(value) => updateDocument(ben.id, doc.id, { type: value })}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue placeholder={t("documentType")} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {documentTypeOptions.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                              {option.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label>{t("documentNumber")}</Label>
+                                      <Input
+                                        value={doc.number}
+                                        onChange={(e) => updateDocument(ben.id, doc.id, { number: e.target.value })}
+                                        placeholder={t("documentNumber")}
+                                      />
+                                    </div>
+                                    <div className="relative">
+                                      <Label>{t("documentPhoto")}</Label>
+                                      <div 
+                                        className="border border-dashed border-gray-300 rounded-lg p-2 h-10 flex items-center justify-center cursor-pointer hover:border-ngo-green"
+                                        onClick={() => triggerDocInput(doc.id)}
+                                      >
+                                        {doc.photo ? (
+                                          <div className="flex items-center">
+                                            <div className="w-6 h-6 mr-2 overflow-hidden rounded">
+                                              <img src={doc.photo} alt="Doc" className="w-full h-full object-cover"/>
+                                            </div>
+                                            <span className="text-xs truncate">{t("photoUploaded")}</span>
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center">
+                                            <Image size={14} className="mr-1 text-gray-400" />
+                                            <span className="text-xs text-gray-500">{t("uploadPhoto")}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <input
+                                        type="file"
+                                        ref={(el) => (docInputRefs.current[doc.id] = el)}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={(e) => handleDocPhotoChange(e, ben.id, doc.id)}
+                                      />
+                                      <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="icon"
+                                        className="absolute top-0 right-0 text-red-500 h-6 w-6"
+                                        onClick={() => removeDocument(ben.id, doc.id)}
+                                      >
+                                        <Trash2 size={14} />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Document Photo Preview */}
+                                  {doc.photo && (
+                                    <div className="mt-2">
+                                      <div className="relative w-24 h-24 mx-auto">
+                                        <img 
+                                          src={doc.photo} 
+                                          alt="Document" 
+                                          className="w-full h-full object-cover rounded-md border border-gray-200" 
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
                           </div>
                           
                           {/* Reference */}

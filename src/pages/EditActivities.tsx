@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,17 @@ import { toast } from "@/lib/toast";
 const EditActivities = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { activities, startNewActivity, getActivityByCode, addActivity } = useNGO();
+  const { activities, startNewActivity, getActivityByCode, addActivity, startEditingActivity } = useNGO();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
 
   const handleAddActivity = () => {
     startNewActivity();
+    navigate("/activity/report");
+  };
+
+  const handleEditActivity = (id: string) => {
+    startEditingActivity(id);
     navigate("/activity/report");
   };
 
@@ -88,7 +94,11 @@ const EditActivities = () => {
               </div>
             ) : (
               activities.map((activity) => (
-                <ActivityCard key={activity.id} activity={activity} />
+                <ActivityCard 
+                  key={activity.id} 
+                  activity={activity} 
+                  onEdit={() => handleEditActivity(activity.id)} 
+                />
               ))
             )}
           </div>
