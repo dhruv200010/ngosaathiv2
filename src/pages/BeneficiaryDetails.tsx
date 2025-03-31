@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -84,7 +83,6 @@ const BeneficiaryDetails = () => {
   };
 
   const handleSave = () => {
-    // Validation
     const isValid = tempActivity.beneficiaries.every(ben => ben.firstName.trim() !== "");
     
     if (!isValid) {
@@ -111,28 +109,30 @@ const BeneficiaryDetails = () => {
 
   const addDocumentToBeneficiary = (benId: string) => {
     const currentDocs = beneficiaryDocs[benId] || [];
-    const newDoc = {
+    const newDoc: AdditionalDocument = {
       id: Date.now().toString(36) + Math.random().toString(36).substring(2),
       type: "aadhar",
       number: "",
       photo: null
     };
     
-    setBeneficiaryDocs({
-      ...beneficiaryDocs,
-      [benId]: [...currentDocs, newDoc]
-    });
+    setBeneficiaryDocs(prevDocs => ({
+      ...prevDocs,
+      [benId]: [...(prevDocs[benId] || []), newDoc]
+    }));
   };
 
   const updateDocument = (benId: string, docId: string, updates: Partial<AdditionalDocument>) => {
-    const currentDocs = beneficiaryDocs[benId] || [];
-    const updatedDocs = currentDocs.map(doc => 
-      doc.id === docId ? { ...doc, ...updates } : doc
-    );
-    
-    setBeneficiaryDocs({
-      ...beneficiaryDocs,
-      [benId]: updatedDocs
+    setBeneficiaryDocs(prevDocs => {
+      const currentDocs = prevDocs[benId] || [];
+      const updatedDocs = currentDocs.map(doc => 
+        doc.id === docId ? { ...doc, ...updates } : doc
+      );
+      
+      return {
+        ...prevDocs,
+        [benId]: updatedDocs
+      };
     });
   };
 
@@ -152,12 +152,14 @@ const BeneficiaryDetails = () => {
   };
 
   const removeDocument = (benId: string, docId: string) => {
-    const currentDocs = beneficiaryDocs[benId] || [];
-    const filteredDocs = currentDocs.filter(doc => doc.id !== docId);
-    
-    setBeneficiaryDocs({
-      ...beneficiaryDocs,
-      [benId]: filteredDocs
+    setBeneficiaryDocs(prevDocs => {
+      const currentDocs = prevDocs[benId] || [];
+      const filteredDocs = currentDocs.filter(doc => doc.id !== docId);
+      
+      return {
+        ...prevDocs,
+        [benId]: filteredDocs
+      };
     });
   };
 
