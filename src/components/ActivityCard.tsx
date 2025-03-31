@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Edit2, Trash2, Share2, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -12,9 +11,10 @@ import { useNavigate } from "react-router-dom";
 
 interface ActivityCardProps {
   activity: Activity;
+  onEdit?: (id: string) => void;
 }
 
-const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
+const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
   const { t } = useLanguage();
   const { deleteActivity, generateShareCodeForActivity } = useNGO();
   const navigate = useNavigate();
@@ -28,7 +28,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
   };
 
   const handleEdit = () => {
-    navigate(`/activity/${activity.id}`);
+    if (onEdit) {
+      onEdit(activity.id);
+    } else {
+      navigate(`/activity/${activity.id}`);
+    }
   };
 
   const handleDelete = () => {
