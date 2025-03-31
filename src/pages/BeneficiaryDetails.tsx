@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO, Beneficiary } from "@/context/NGOContext";
 import { PlusCircle, Trash2, UserPlus, Upload } from "lucide-react";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/lib/toast";
 
 const BeneficiaryDetails = () => {
   const navigate = useNavigate();

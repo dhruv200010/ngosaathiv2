@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import Header from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/lib/toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload } from "lucide-react";
 

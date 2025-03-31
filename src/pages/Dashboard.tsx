@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/lib/toast";
 import { PlusCircle, Edit, Import } from "lucide-react";
 
 const Dashboard = () => {

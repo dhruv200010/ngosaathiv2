@@ -10,7 +10,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO, Document } from "@/context/NGOContext";
 import { File, PlusCircle, Trash2 } from "lucide-react";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/lib/toast";
 import { Card, CardContent } from "@/components/ui/card";
 
 const DocumentUpload = () => {

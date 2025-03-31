@@ -1,9 +1,9 @@
 
 type TranslationKey = string;
-type Language = "en" | "hi" | "gu";
+export type TranslationLanguage = "en" | "hi" | "gu";
 
 type Translations = {
-  [key in Language]: {
+  [key in TranslationLanguage]: {
     [key in TranslationKey]: string;
   };
 };
@@ -73,6 +73,10 @@ export const translations: Translations = {
     // Dashboard
     addActivity: "Add Activity",
     editActivity: "Edit Activity",
+    createNewActivity: "Create a new activity",
+    manageActivities: "Manage your activities",
+    importActivity: "Import Activity",
+    importFromOtherUser: "Import from other user",
     
     // Menu Items
     analytics: "Analytics",
@@ -86,10 +90,13 @@ export const translations: Translations = {
     location: "Location",
     getCurrentLocation: "Get Current Location",
     date: "Date",
+    selectDate: "Select date",
     setCurrentDate: "Set Current Date",
     personOfContact: "Person of Contact",
     description: "Description",
     uploadMedia: "Upload Media",
+    dragAndDropMedia: "Click or drag & drop to upload photos/videos",
+    name: "Name",
     
     // Document Upload
     uploadDocuments: "Upload Documents",
@@ -100,10 +107,16 @@ export const translations: Translations = {
     invoice: "Invoice",
     cashVoucher: "Cash Voucher",
     other: "Other",
+    noDocuments: "No documents added yet",
+    selectFile: "Select file",
     
     // Beneficiary Details
     beneficiaryDetails: "Beneficiary Details",
     addBeneficiary: "Add Beneficiary",
+    newBeneficiary: "New Beneficiary",
+    firstNameRequired: "First name is required for all beneficiaries",
+    noBeneficiaries: "No beneficiaries added yet",
+    remove: "Remove",
     firstName: "First Name",
     middleName: "Middle Name",
     lastName: "Last Name",
@@ -118,7 +131,6 @@ export const translations: Translations = {
     age: "Age",
     contactNumber: "Contact Number",
     address: "Address",
-    documentType: "Document Type",
     documentNumber: "Document Number",
     aadhar: "Aadhar",
     pan: "PAN",
@@ -126,19 +138,35 @@ export const translations: Translations = {
     election: "Voter ID",
     referencePerson: "Reference Person",
     referenceContact: "Reference Contact",
-    uploadPhoto: "Upload Photo",
     
     // Edit Activities
     activities: "Activities",
     noActivities: "No activities found",
     beneficiaries: "Beneficiaries",
-    importActivity: "Import Activity",
     enterCode: "Enter Code",
     activityShared: "Activity shared successfully",
     activityImported: "Activity imported successfully",
     deleteConfirm: "Are you sure you want to delete this activity?",
+    deleteActivityDescription: "This action cannot be undone. All data associated with this activity will be permanently deleted.",
     shareActivity: "Share Activity",
+    shareActivityDescription: "Share this activity with other users using the code below:",
     activityCode: "Activity Code",
+    enterCodeDescription: "Enter the code shared with you to import an activity:",
+    copy: "Copy",
+    close: "Close",
+    activitySaved: "Activity saved successfully",
+    enterValidCode: "Please enter a valid code",
+    invalidCode: "Invalid code. Please check and try again",
+    ngoNameRequired: "NGO name is required",
+    activityNameRequired: "Activity name is required",
+    dateRequired: "Date is required",
+    fetchingLocation: "Fetching your current location...",
+    locationFetched: "Current location fetched",
+    locationError: "Error getting your location",
+    geolocationNotSupported: "Geolocation is not supported in your browser",
+    showMore: "Show more",
+    showLess: "Show less",
+    addFirstActivity: "Add your first activity",
     
     // Progress
     step1: "Activity Details",
@@ -209,6 +237,10 @@ export const translations: Translations = {
     // Dashboard
     addActivity: "गतिविधि जोड़ें",
     editActivity: "गतिविधि संपादित करें",
+    createNewActivity: "नई गतिविधि बनाएं",
+    manageActivities: "अपनी गतिविधियों का प्रबंधन करें",
+    importActivity: "गतिविधि आयात करें",
+    importFromOtherUser: "अन्य उपयोगकर्ता से आयात करें",
     
     // Menu Items
     analytics: "विश्लेषिकी",
@@ -222,10 +254,13 @@ export const translations: Translations = {
     location: "स्थान",
     getCurrentLocation: "वर्तमान स्थान प्राप्त करें",
     date: "तारीख",
+    selectDate: "तारीख चुनें",
     setCurrentDate: "वर्तमान तिथि सेट करें",
     personOfContact: "संपर्क व्यक्ति",
     description: "विवरण",
     uploadMedia: "मीडिया अपलोड करें",
+    dragAndDropMedia: "फोटो/वीडियो अपलोड करने के लिए क्लिक करें या खींचें और छोड़ें",
+    name: "नाम",
     
     // Document Upload
     uploadDocuments: "दस्तावेज़ अपलोड करें",
@@ -236,10 +271,16 @@ export const translations: Translations = {
     invoice: "चालान",
     cashVoucher: "नकद वाउचर",
     other: "अन्य",
+    noDocuments: "अभी तक कोई दस्तावेज़ नहीं जोड़ा गया",
+    selectFile: "फ़ाइल चुनें",
     
     // Beneficiary Details
     beneficiaryDetails: "लाभार्थी विवरण",
     addBeneficiary: "लाभार्थी जोड़ें",
+    newBeneficiary: "नया लाभार्थी",
+    firstNameRequired: "सभी लाभार्थियों के लिए पहला नाम आवश्यक है",
+    noBeneficiaries: "अभी तक कोई लाभार्थी नहीं जोड़ा गया",
+    remove: "हटाएं",
     firstName: "पहला नाम",
     middleName: "मध्य नाम",
     lastName: "अंतिम नाम",
@@ -254,7 +295,6 @@ export const translations: Translations = {
     age: "उम्र",
     contactNumber: "संपर्क नंबर",
     address: "पता",
-    documentType: "दस्तावेज़ प्रकार",
     documentNumber: "दस्तावेज़ संख्या",
     aadhar: "आधार",
     pan: "पैन",
@@ -262,19 +302,35 @@ export const translations: Translations = {
     election: "वोटर आईडी",
     referencePerson: "संदर्भ व्यक्ति",
     referenceContact: "संदर्भ संपर्क",
-    uploadPhoto: "फोटो अपलोड करें",
     
     // Edit Activities
     activities: "गतिविधियां",
     noActivities: "कोई गतिविधि नहीं मिली",
     beneficiaries: "लाभार्थी",
-    importActivity: "गतिविधि आयात करें",
     enterCode: "कोड दर्ज करें",
     activityShared: "गतिविधि सफलतापूर्वक साझा की गई",
     activityImported: "गतिविधि सफलतापूर्वक आयात की गई",
     deleteConfirm: "क्या आप वाकई इस गतिविधि को हटाना चाहते हैं?",
+    deleteActivityDescription: "यह क्रिया वापस नहीं की जा सकती। इस गतिविधि से जुड़े सभी डेटा स्थायी रूप से हटा दिए जाएंगे।",
     shareActivity: "गतिविधि साझा करें",
+    shareActivityDescription: "नीचे दिए गए कोड का उपयोग करके यह गतिविधि अन्य उपयोगकर्ताओं के साथ साझा करें:",
     activityCode: "गतिविधि कोड",
+    enterCodeDescription: "गतिविधि आयात करने के लिए आपके साथ साझा किया गया कोड दर्ज करें:",
+    copy: "कॉपी करें",
+    close: "बंद करें",
+    activitySaved: "गतिविधि सफलतापूर्वक सहेजी गई",
+    enterValidCode: "कृपया एक वैध कोड दर्ज करें",
+    invalidCode: "अमान्य कोड। कृपया जांचें और पुनः प्रयास करें",
+    ngoNameRequired: "NGO नाम आवश्यक है",
+    activityNameRequired: "गतिविधि का नाम आवश्यक है",
+    dateRequired: "तारीख आवश्यक है",
+    fetchingLocation: "आपका वर्तमान स्थान प्राप्त करना...",
+    locationFetched: "वर्तमान स्थान प्राप्त किया गया",
+    locationError: "आपका स्थान प्राप्त करने में त्रुटि",
+    geolocationNotSupported: "आपके ब्राउज़र में भू-स्थानांकन समर्थित नहीं है",
+    showMore: "अधिक दिखाएं",
+    showLess: "कम दिखाएं",
+    addFirstActivity: "अपनी पहली गतिविधि जोड़ें",
     
     // Progress
     step1: "गतिविधि विवरण",
@@ -345,6 +401,10 @@ export const translations: Translations = {
     // Dashboard
     addActivity: "પ્રવૃત્તિ ઉમેરો",
     editActivity: "પ્રવૃત્તિ સંપાદિત કરો",
+    createNewActivity: "નવી પ્રવૃત્તિ બનાવો",
+    manageActivities: "તમારી પ્રવૃત્તિઓનું સંચાલન કરો",
+    importActivity: "પ્રવૃત્તિ આયાત કરો",
+    importFromOtherUser: "અન્ય વપરાશકર્તા પાસેથી આયાત કરો",
     
     // Menu Items
     analytics: "એનાલિટિક્સ",
@@ -358,10 +418,13 @@ export const translations: Translations = {
     location: "સ્થળ",
     getCurrentLocation: "વર્તમાન સ્થાન મેળવો",
     date: "તારીખ",
+    selectDate: "તારીખ પસંદ કરો",
     setCurrentDate: "વર્તમાન તારીખ સેટ કરો",
     personOfContact: "સંપર્ક વ્યક્તિ",
     description: "વર્ણન",
     uploadMedia: "મીડિયા અપલોડ કરો",
+    dragAndDropMedia: "ફોટા/વિડિઓ અપલોડ કરવા માટે ક્લિક કરો અથવા ખેંચો અને છોડો",
+    name: "નામ",
     
     // Document Upload
     uploadDocuments: "દસ્તાવેજો અપલોડ કરો",
@@ -372,10 +435,16 @@ export const translations: Translations = {
     invoice: "ઇનવોઇસ",
     cashVoucher: "રોકડ વાઉચર",
     other: "અન્ય",
+    noDocuments: "હજુ સુધી કોઈ દસ્તાવેજો ઉમેરાયા નથી",
+    selectFile: "ફાઈલ પસંદ કરો",
     
     // Beneficiary Details
     beneficiaryDetails: "લાભાર્થી વિગતો",
     addBeneficiary: "લાભાર્થી ઉમેરો",
+    newBeneficiary: "નવો લાભાર્થી",
+    firstNameRequired: "બધા લાભાર્થીઓ માટે પ્રથમ નામ જરૂરી છે",
+    noBeneficiaries: "હજુ સુધી કોઈ લાભાર્થી ઉમેરાયા નથી",
+    remove: "દૂર કરો",
     firstName: "પ્રથમ નામ",
     middleName: "મધ્ય નામ",
     lastName: "અંતિમ નામ",
@@ -390,7 +459,6 @@ export const translations: Translations = {
     age: "ઉંમર",
     contactNumber: "સંપર્ક નંબર",
     address: "સરનામું",
-    documentType: "દસ્તાવેજનો પ્રકાર",
     documentNumber: "દસ્તાવેજ નંબર",
     aadhar: "આધાર",
     pan: "પાન",
@@ -398,19 +466,35 @@ export const translations: Translations = {
     election: "મતદાર ID",
     referencePerson: "સંદર્ભ વ્યક્તિ",
     referenceContact: "સંદર્ભ સંપર્ક",
-    uploadPhoto: "ફોટો અપલોડ કરો",
     
     // Edit Activities
     activities: "પ્રવૃત્તિઓ",
     noActivities: "કોઈ પ્રવૃત્તિઓ મળી નથી",
     beneficiaries: "લાભાર્થીઓ",
-    importActivity: "પ્રવૃત્તિ આયાત કરો",
     enterCode: "કોડ દાખલ કરો",
     activityShared: "પ્રવૃત્તિ સફળતાપૂર્વક શેર કરી",
     activityImported: "પ્રવૃત્તિ સફળતાપૂર્વક આયાત કરી",
     deleteConfirm: "શું તમે ખરેખર આ પ્રવૃત્તિ કાઢી નાખવા માંગો છો?",
+    deleteActivityDescription: "આ ક્રિયા પાછી લઈ શકાતી નથી. આ પ્રવૃત્તિ સાથે સંકળાયેલ તમામ ડેટા કાયમી ધોરણે કાઢી નાખવામાં આવશે.",
     shareActivity: "પ્રવૃત્તિ શેર કરો",
+    shareActivityDescription: "નીચેના કોડનો ઉપયોગ કરીને આ પ્રવૃત્તિ અન્ય વપરાશકર્તાઓ સાથે શેર કરો:",
     activityCode: "પ્રવૃત્તિ કોડ",
+    enterCodeDescription: "પ્રવૃત્તિ આયાત કરવા માટે તમારી સાથે શેર કરેલો કોડ દાખલ કરો:",
+    copy: "કોપી કરો",
+    close: "બંધ કરો",
+    activitySaved: "પ્રવૃત્તિ સફળતાપૂર્વક સાચવી",
+    enterValidCode: "કૃપા કરી માન્ય કોડ દાખલ કરો",
+    invalidCode: "અમાન્ય કોડ. કૃપા કરીને તપાસો અને ફરી પ્રયાસ કરો",
+    ngoNameRequired: "NGO નામ જરૂરી છે",
+    activityNameRequired: "પ્રવૃત્તિનું નામ જરૂરી છે",
+    dateRequired: "તારીખ જરૂરી છે",
+    fetchingLocation: "તમારું વર્તમાન સ્થાન મેળવી રહ્યા છીએ...",
+    locationFetched: "વર્તમાન સ્થાન મેળવ્યું",
+    locationError: "તમારું સ્થાન મેળવવામાં ભૂલ",
+    geolocationNotSupported: "તમારા બ્રાઉઝરમાં જિઓલોકેશન સપોર્ટેડ નથી",
+    showMore: "વધુ બતાવો",
+    showLess: "ઓછું બતાવો",
+    addFirstActivity: "તમારી પ્રથમ પ્રવૃત્તિ ઉમેરો",
     
     // Progress
     step1: "પ્રવૃત્તિ વિગતો",
@@ -418,5 +502,3 @@ export const translations: Translations = {
     step3: "લાભાર્થીઓ",
   }
 };
-
-export type TranslationLanguage = keyof typeof translations;

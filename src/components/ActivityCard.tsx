@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO, Activity } from "@/context/NGOContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/lib/toast";
 import { useNavigate } from "react-router-dom";
 
 interface ActivityCardProps {
