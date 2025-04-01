@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "@/lib/toast";
 import { 
@@ -6,12 +5,12 @@ import {
   saveToLocalStorage, 
   getFromLocalStorage, 
   generateUniqueId, 
-  generateShareCode,
   getDefaultNGOProfile,
   getDefaultActivity,
   getDefaultDocument,
   getDefaultBeneficiary
 } from "@/utils/localStorage";
+import { generateSecureCode, validateSecureCode } from "@/utils/codeGenerator";
 
 // Types
 export interface NGOProfile {
@@ -124,12 +123,10 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
     tempActivity: getDefaultActivity(),
   });
 
-  // Save profile to localStorage when it changes
   useEffect(() => {
     saveToLocalStorage(STORAGE_KEYS.PROFILE, profile);
   }, [profile]);
 
-  // Save activities to localStorage when they change
   useEffect(() => {
     saveToLocalStorage(STORAGE_KEYS.ACTIVITIES, activities);
   }, [activities]);
@@ -266,26 +263,26 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
   const saveActivity = () => {
     const { tempActivity, editingActivityId } = formState;
     
-    // Generate share code if it doesn't exist
     if (!tempActivity.shareCode) {
-      tempActivity.shareCode = generateShareCode();
+      tempActivity.shareCode = generateSecureCode();
     }
 
     if (editingActivityId) {
-      // Update existing activity
       updateActivity(editingActivityId, tempActivity);
       toast.success("Activity updated successfully");
     } else {
-      // Add new activity
       addActivity(tempActivity);
       toast.success("Activity added successfully");
     }
     
-    // Reset form state
     resetFormState();
   };
 
   const getActivityByCode = (code: string): Activity | null => {
+    if (!validateSecureCode(code)) {
+      return null;
+    }
+    
     return activities.find(activity => activity.shareCode === code) || null;
   };
 
@@ -294,7 +291,7 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
     if (!activity) return "";
     
     if (!activity.shareCode) {
-      const newCode = generateShareCode();
+      const newCode = generateSecureCode();
       updateActivity(id, { shareCode: newCode });
       return newCode;
     }

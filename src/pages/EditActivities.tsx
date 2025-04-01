@@ -10,6 +10,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
 import { PlusCircle, Import } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { validateSecureCode } from "@/utils/codeGenerator";
 
 const EditActivities = () => {
   const navigate = useNavigate();
@@ -35,6 +36,12 @@ const EditActivities = () => {
   const processImport = () => {
     if (!importCode.trim()) {
       toast.error(t("enterValidCode"));
+      return;
+    }
+
+    // Validate code format first
+    if (!validateSecureCode(importCode)) {
+      toast.error(t("invalidCodeFormat"));
       return;
     }
 
