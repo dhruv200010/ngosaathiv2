@@ -31,6 +31,7 @@ const BeneficiaryDetails = () => {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const docInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const docPhotoRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [docPhotos, setDocPhotos] = useState<Record<string, string | null>>({});
 
   const genderOptions = [
     { value: "female", label: t("female") },
@@ -163,17 +164,16 @@ const BeneficiaryDetails = () => {
     });
   };
 
-  // Handle document photo change separately from profile photo
-  const handleDocumentPhotoChange = (e: React.ChangeEvent<HTMLInputElement>, benId: string) => {
+  const handleMainDocPhotoChange = (e: React.ChangeEvent<HTMLInputElement>, benId: string) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          updateBeneficiaryInTemp(benId, { 
-            documentNo: tempActivity.beneficiaries.find(b => b.id === benId)?.documentNo || "",
-            // Don't update the profile photo here
-          });
+          setDocPhotos(prev => ({
+            ...prev,
+            [benId]: event.target.result as string
+          }));
         }
       };
       reader.readAsDataURL(file);
@@ -201,7 +201,6 @@ const BeneficiaryDetails = () => {
               </Button>
             </div>
             
-            {/* Beneficiary List */}
             <div className="space-y-4">
               {tempActivity.beneficiaries.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">{t("noBeneficiaries")}</p>
@@ -226,7 +225,6 @@ const BeneficiaryDetails = () => {
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4">
                         <div className="space-y-4">
-                          {/* Photo Upload */}
                           <div className="flex justify-center mb-4">
                             <div className="relative group">
                               <Avatar className="h-24 w-24 border-2 border-ngo-green">
@@ -253,7 +251,6 @@ const BeneficiaryDetails = () => {
                             </div>
                           </div>
                           
-                          {/* Name Fields */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <Label>
@@ -284,7 +281,6 @@ const BeneficiaryDetails = () => {
                             </div>
                           </div>
                           
-                          {/* Gender, Caste, Age */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <Label>{t("gender")}</Label>
@@ -341,7 +337,6 @@ const BeneficiaryDetails = () => {
                             </div>
                           </div>
                           
-                          {/* Contact and Address */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <Label>{t("contactNumber")}</Label>
@@ -370,7 +365,6 @@ const BeneficiaryDetails = () => {
                             />
                           </div>
                           
-                          {/* Documents Section */}
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
                               <Label className="text-base font-medium">{t("documents")}</Label>
@@ -386,7 +380,6 @@ const BeneficiaryDetails = () => {
                               </Button>
                             </div>
                             
-                            {/* Main Document Fields */}
                             <Card className="border border-gray-200">
                               <CardContent className="p-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -428,32 +421,16 @@ const BeneficiaryDetails = () => {
                                       ref={(el) => (docPhotoRefs.current[`main-${ben.id}`] = el)}
                                       className="hidden"
                                       accept="image/*"
-                                      onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                          const reader = new FileReader();
-                                          reader.onload = (event) => {
-                                            if (event.target?.result) {
-                                              // Only update the document photo here,
-                                              // NOT the beneficiary profile photo
-                                              updateBeneficiaryInTemp(ben.id, { 
-                                                photo: ben.photo // Keep the existing profile photo
-                                                // Here we're not setting a document photo - we would need a separate field in the Beneficiary type
-                                              });
-                                            }
-                                          };
-                                          reader.readAsDataURL(file);
-                                        }
-                                      }}
+                                      onChange={(e) => handleMainDocPhotoChange(e, ben.id)}
                                     />
                                     <div 
                                       className="border border-dashed border-gray-300 rounded-lg p-2 h-10 flex items-center justify-center cursor-pointer hover:border-ngo-green"
                                       onClick={() => triggerDocInput(`main-${ben.id}`, "photo")}
                                     >
-                                      {ben.photo ? (
+                                      {docPhotos[ben.id] ? (
                                         <div className="flex items-center">
                                           <div className="w-6 h-6 mr-2 overflow-hidden rounded">
-                                            <img src={ben.photo} alt="Doc" className="w-full h-full object-cover"/>
+                                            <img src={docPhotos[ben.id] || ''} alt="Doc" className="w-full h-full object-cover"/>
                                           </div>
                                           <span className="text-xs truncate">{t("photoUploaded")}</span>
                                         </div>
@@ -467,12 +444,11 @@ const BeneficiaryDetails = () => {
                                   </div>
                                 </div>
                                 
-                                {/* Document Photo Preview */}
-                                {ben.photo && (
+                                {docPhotos[ben.id] && (
                                   <div className="mt-3">
                                     <div className="relative w-24 h-24 mx-auto">
                                       <img 
-                                        src={ben.photo} 
+                                        src={docPhotos[ben.id] || ''} 
                                         alt="Document" 
                                         className="w-full h-full object-cover rounded-md border border-gray-200" 
                                       />
@@ -482,7 +458,6 @@ const BeneficiaryDetails = () => {
                               </CardContent>
                             </Card>
                             
-                            {/* Additional Documents */}
                             {(beneficiaryDocs[ben.id] || []).map((doc) => (
                               <Card key={doc.id} className="border border-gray-200">
                                 <CardContent className="p-4">
@@ -556,7 +531,6 @@ const BeneficiaryDetails = () => {
                                     </div>
                                   </div>
                                   
-                                  {/* Document Photo Preview */}
                                   {doc.photo && (
                                     <div className="mt-3">
                                       <div className="relative w-24 h-24 mx-auto">
@@ -573,7 +547,6 @@ const BeneficiaryDetails = () => {
                             ))}
                           </div>
                           
-                          {/* Reference */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <Label>{t("referencePerson")}</Label>
@@ -593,7 +566,6 @@ const BeneficiaryDetails = () => {
                             </div>
                           </div>
                           
-                          {/* Remove Button */}
                           <div className="flex justify-end">
                             <Button 
                               type="button" 
@@ -614,7 +586,6 @@ const BeneficiaryDetails = () => {
               )}
             </div>
             
-            {/* Navigation Buttons */}
             <div className="flex justify-between pt-4">
               <Button 
                 type="button" 
