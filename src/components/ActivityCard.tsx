@@ -134,7 +134,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
       }
       
       // Add footer
-      const pageCount = doc.internal.getNumberOfPages();
+      // Fix: Use internal.pages.length instead of getNumberOfPages()
+      const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(10);
