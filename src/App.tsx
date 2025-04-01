@@ -16,6 +16,10 @@ import ActivityReport from "./pages/ActivityReport";
 import DocumentUpload from "./pages/DocumentUpload";
 import BeneficiaryDetails from "./pages/BeneficiaryDetails";
 import EditActivities from "./pages/EditActivities";
+import Analytics from "./pages/Analytics";
+import Downloads from "./pages/Downloads";
+import Support from "./pages/Support";
+import AboutUs from "./pages/AboutUs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +42,10 @@ const App = () => (
               <Route path="/activity/beneficiaries" element={<BeneficiaryDetails />} />
               <Route path="/activity/edit" element={<EditActivities />} />
               <Route path="/profile" element={<SetupNGO />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/downloads" element={<Downloads />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/about" element={<AboutUs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

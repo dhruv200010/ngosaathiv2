@@ -6,12 +6,13 @@ import { useLanguage } from "@/context/LanguageContext";
 import { TranslationLanguage } from "@/utils/languageData";
 import { useNGO } from "@/context/NGOContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const ProfileMenu: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
-  const { profile } = useNGO();
+  const { profile, downloadedFiles } = useNGO();
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -69,10 +70,17 @@ const ProfileMenu: React.FC = () => {
             </button>
             <button
               onClick={() => handleNavigation("/downloads")}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
-              <Download size={16} className="mr-2" />
-              {t("downloads")}
+              <div className="flex items-center">
+                <Download size={16} className="mr-2" />
+                {t("downloads")}
+              </div>
+              {downloadedFiles.length > 0 && (
+                <Badge variant="outline" className="bg-ngo-green text-white text-xs">
+                  {downloadedFiles.length}
+                </Badge>
+              )}
             </button>
             <button
               onClick={() => handleNavigation("/support")}

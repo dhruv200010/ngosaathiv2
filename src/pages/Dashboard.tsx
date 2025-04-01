@@ -8,14 +8,20 @@ import Header from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
 import { toast } from "@/lib/toast";
-import { PlusCircle, Edit, Import } from "lucide-react";
+import { PlusCircle, Edit, Import, ActivityIcon } from "lucide-react";
+import ActivityCard from "@/components/ActivityCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { profile, startNewActivity, getActivityByCode, addActivity } = useNGO();
+  const { profile, activities, startNewActivity, getActivityByCode, addActivity } = useNGO();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
+
+  // Get recent activities (last 2)
+  const recentActivities = [...activities].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  ).slice(0, 2);
 
   const handleAddActivity = () => {
     startNewActivity();
@@ -65,7 +71,7 @@ const Dashboard = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div 
               className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center hover:shadow-lg transition-shadow cursor-pointer"
               onClick={handleAddActivity}
@@ -105,6 +111,38 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
+          
+          {/* Recent Activities Section */}
+          {recentActivities.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center mb-4">
+                <ActivityIcon size={20} className="text-ngo-dark mr-2" />
+                <h2 className="text-xl font-semibold text-ngo-dark">{t("recentActivities")}</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {recentActivities.map(activity => (
+                  <ActivityCard 
+                    key={activity.id} 
+                    activity={activity} 
+                    onEdit={(id) => navigate(`/activity/edit?id=${id}`)}
+                  />
+                ))}
+                
+                {recentActivities.length > 0 && (
+                  <div className="text-center mt-4">
+                    <Button 
+                      variant="outline"
+                      onClick={handleEditActivities}
+                      className="text-ngo-dark hover:text-ngo-dark/80"
+                    >
+                      {t("viewAllActivities")}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

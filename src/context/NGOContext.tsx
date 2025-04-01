@@ -70,6 +70,16 @@ export interface Activity {
   shareCode: string;
 }
 
+export interface DownloadedFile {
+  id: string;
+  fileName: string;
+  fileType: string;
+  activityId: string;
+  activityName: string;
+  downloadDate: string;
+  fileUrl?: string; // In a real app, this would be a URL to the file
+}
+
 export interface FormState {
   currentStep: number;
   editingActivityId: string | null;
@@ -80,6 +90,7 @@ interface NGOContextType {
   profile: NGOProfile;
   activities: Activity[];
   formState: FormState;
+  downloadedFiles: DownloadedFile[];
   setProfile: (profile: NGOProfile) => void;
   updateProfile: (updates: Partial<NGOProfile>) => void;
   setActivities: (activities: Activity[]) => void;
@@ -100,6 +111,8 @@ interface NGOContextType {
   saveActivity: () => void;
   getActivityByCode: (code: string) => Activity | null;
   generateShareCodeForActivity: (id: string) => string;
+  addDownloadedFile: (file: Omit<DownloadedFile, 'id'>) => void;
+  removeDownloadedFile: (id: string) => void;
 }
 
 const NGOContext = createContext<NGOContextType | undefined>(undefined);
@@ -123,6 +136,10 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
     tempActivity: getDefaultActivity(),
   });
 
+  const [downloadedFiles, setDownloadedFiles] = useState<DownloadedFile[]>(
+    () => getFromLocalStorage<DownloadedFile[]>(STORAGE_KEYS.DOWNLOADED_FILES, [])
+  );
+
   useEffect(() => {
     saveToLocalStorage(STORAGE_KEYS.PROFILE, profile);
   }, [profile]);
@@ -130,6 +147,10 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
   useEffect(() => {
     saveToLocalStorage(STORAGE_KEYS.ACTIVITIES, activities);
   }, [activities]);
+
+  useEffect(() => {
+    saveToLocalStorage(STORAGE_KEYS.DOWNLOADED_FILES, downloadedFiles);
+  }, [downloadedFiles]);
 
   const setProfile = (newProfile: NGOProfile) => {
     setProfileState(newProfile);
@@ -299,12 +320,25 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
     return activity.shareCode;
   };
 
+  const addDownloadedFile = (file: Omit<DownloadedFile, 'id'>) => {
+    const newFile: DownloadedFile = {
+      ...file,
+      id: generateUniqueId(),
+    };
+    setDownloadedFiles(prev => [newFile, ...prev]);
+  };
+
+  const removeDownloadedFile = (id: string) => {
+    setDownloadedFiles(prev => prev.filter(file => file.id !== id));
+  };
+
   return (
     <NGOContext.Provider
       value={{
         profile,
         activities,
         formState,
+        downloadedFiles,
         setProfile,
         updateProfile,
         setActivities,
@@ -325,6 +359,8 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
         saveActivity,
         getActivityByCode,
         generateShareCodeForActivity,
+        addDownloadedFile,
+        removeDownloadedFile,
       }}
     >
       {children}

@@ -1,12 +1,13 @@
-
 import { Activity, Beneficiary, Document, NGOProfile } from "@/context/NGOContext";
 
 const STORAGE_PREFIX = "ngo_saathi_";
 
 export const STORAGE_KEYS = {
-  PROFILE: `${STORAGE_PREFIX}profile`,
-  ACTIVITIES: `${STORAGE_PREFIX}activities`,
-  LANGUAGE: `${STORAGE_PREFIX}language`,
+  PROFILE: "ngo_profile",
+  ACTIVITIES: "ngo_activities",
+  LANGUAGE: "ngo_language",
+  TEMP_ACTIVITY: "ngo_temp_activity",
+  DOWNLOADED_FILES: "ngo_downloaded_files",
 };
 
 export const saveToLocalStorage = <T>(key: string, data: T): void => {

@@ -62,29 +62,41 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // Add app branding and styling
+      // Header with app name and theme color
+      doc.setFillColor(46, 204, 113); // NGO green color
+      doc.rect(0, 0, pageWidth, 20, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text("NGO Activity Manager", pageWidth / 2, 12, { align: 'center' });
       
       // Add title
-      doc.setFontSize(18);
+      doc.setFontSize(20);
       doc.setTextColor(44, 62, 80);
+      doc.setFont('helvetica', 'bold');
       const title = activity.name;
-      doc.text(title, pageWidth / 2, 20, { align: 'center' });
+      doc.text(title, pageWidth / 2, 35, { align: 'center' });
       
       // Add date and location
       doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 100, 100);
-      doc.text(`${t("date")}: ${activity.date}`, 14, 30);
-      doc.text(`${t("location")}: ${activity.location}`, 14, 37);
+      doc.text(`${t("date")}: ${activity.date}`, 14, 45);
+      doc.text(`${t("location")}: ${activity.location}`, 14, 52);
       
       // Add description
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
-      doc.text(`${t("description")}:`, 14, 47);
+      doc.text(`${t("description")}:`, 14, 62);
       
       const splitDescription = doc.splitTextToSize(activity.description, pageWidth - 28);
-      doc.text(splitDescription, 14, 54);
+      doc.text(splitDescription, 14, 69);
       
       // Add contact person
-      let yPos = 54 + (splitDescription.length * 7);
+      let yPos = 69 + (splitDescription.length * 7);
       doc.text(`${t("personOfContact")}: ${activity.contactPerson.name} (${activity.contactPerson.contactNo})`, 14, yPos);
       
       // Add beneficiaries table
@@ -133,7 +145,132 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
         });
       }
       
-      // Add footer
+      // Add media and document previews on new pages if they exist
+      if (activity.media.length > 0 || activity.documents.some(d => d.preview)) {
+        // First add a new page for media files if they exist
+        if (activity.media.length > 0) {
+          doc.addPage();
+          
+          // Add header to new page
+          doc.setFillColor(46, 204, 113);
+          doc.rect(0, 0, pageWidth, 20, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Media Files", pageWidth / 2, 12, { align: 'center' });
+          
+          doc.setTextColor(44, 62, 80);
+          doc.setFontSize(14);
+          doc.text(`${t("media")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
+          
+          // Organize media in a grid layout
+          const mediaPerRow = 2;
+          const mediaWidth = pageWidth / mediaPerRow - 20;
+          const mediaHeight = mediaWidth * 0.75;
+          let mediaX = 15;
+          let mediaY = 40;
+          
+          activity.media.forEach((mediaUrl, index) => {
+            try {
+              // In a real app, we would handle image loading better
+              // but for now, we'll just indicate the media position
+              doc.setDrawColor(200, 200, 200);
+              doc.setFillColor(240, 240, 240);
+              doc.roundedRect(mediaX, mediaY, mediaWidth, mediaHeight, 3, 3, 'FD');
+              
+              doc.setFontSize(10);
+              doc.setTextColor(100, 100, 100);
+              doc.text(`${t("media")} #${index + 1}`, mediaX + mediaWidth/2, mediaY + mediaHeight/2, { align: 'center' });
+              
+              // Move to next position
+              if ((index + 1) % mediaPerRow === 0) {
+                mediaX = 15;
+                mediaY += mediaHeight + 15;
+                
+                // Add new page if needed
+                if (mediaY + mediaHeight > pageHeight - 20) {
+                  doc.addPage();
+                  // Add header to new page
+                  doc.setFillColor(46, 204, 113);
+                  doc.rect(0, 0, pageWidth, 20, 'F');
+                  doc.setTextColor(255, 255, 255);
+                  doc.setFontSize(16);
+                  doc.text("Media Files (Continued)", pageWidth / 2, 12, { align: 'center' });
+                  mediaY = 40;
+                }
+              } else {
+                mediaX += mediaWidth + 10;
+              }
+            } catch (error) {
+              console.error("Error adding media to PDF:", error);
+            }
+          });
+        }
+        
+        // Now add a new page for document previews if they exist
+        const docsWithPreview = activity.documents.filter(d => d.preview);
+        if (docsWithPreview.length > 0) {
+          doc.addPage();
+          
+          // Add header to new page
+          doc.setFillColor(46, 204, 113);
+          doc.rect(0, 0, pageWidth, 20, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Document Previews", pageWidth / 2, 12, { align: 'center' });
+          
+          doc.setTextColor(44, 62, 80);
+          doc.setFontSize(14);
+          doc.text(`${t("documents")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
+          
+          // Organize documents in a grid layout
+          const docsPerRow = 2;
+          const docWidth = pageWidth / docsPerRow - 20;
+          const docHeight = docWidth * 0.75;
+          let docX = 15;
+          let docY = 40;
+          
+          docsWithPreview.forEach((document, index) => {
+            try {
+              // In a real app, we would handle image loading better
+              doc.setDrawColor(200, 200, 200);
+              doc.setFillColor(240, 240, 240);
+              doc.roundedRect(docX, docY, docWidth, docHeight, 3, 3, 'FD');
+              
+              doc.setFontSize(10);
+              doc.setTextColor(100, 100, 100);
+              doc.text(document.fileName || `${t("document")} #${index + 1}`, docX + docWidth/2, docY + docHeight/2 - 10, { align: 'center' });
+              doc.text(document.type, docX + docWidth/2, docY + docHeight/2, { align: 'center' });
+              doc.text(document.comment || "", docX + docWidth/2, docY + docHeight/2 + 10, { align: 'center' });
+              
+              // Move to next position
+              if ((index + 1) % docsPerRow === 0) {
+                docX = 15;
+                docY += docHeight + 15;
+                
+                // Add new page if needed
+                if (docY + docHeight > pageHeight - 20) {
+                  doc.addPage();
+                  // Add header to new page
+                  doc.setFillColor(46, 204, 113);
+                  doc.rect(0, 0, pageWidth, 20, 'F');
+                  doc.setTextColor(255, 255, 255);
+                  doc.setFontSize(16);
+                  doc.text("Document Previews (Continued)", pageWidth / 2, 12, { align: 'center' });
+                  docY = 40;
+                }
+              } else {
+                docX += docWidth + 10;
+              }
+            } catch (error) {
+              console.error("Error adding document preview to PDF:", error);
+            }
+          });
+        }
+      }
+      
+      // Add footer to all pages
       // Fix: Use internal.pages.length instead of getNumberOfPages()
       const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
@@ -141,11 +278,12 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
         doc.text(
-          `${t("generatedBy")}: ${new Date().toLocaleDateString()}`,
+          `${t("generatedBy")}: NGO Activity Manager - ${new Date().toLocaleDateString()}`,
           pageWidth / 2,
           doc.internal.pageSize.getHeight() - 10,
           { align: 'center' }
         );
+        doc.text(`${t("page")} ${i} ${t("of")} ${pageCount}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 10);
       }
       
       // Save PDF
