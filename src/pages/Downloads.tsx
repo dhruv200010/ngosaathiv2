@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileDown, Trash2 } from "lucide-react";
+import { FileDown, Trash2, FilePdf, FileImage } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 const Downloads: React.FC = () => {
@@ -15,13 +15,23 @@ const Downloads: React.FC = () => {
   const navigate = useNavigate();
 
   const handleDownload = (fileName: string) => {
-    // In a real app, this would download the actual file
+    // In a real app, this would download the actual file from storage
     toast.success(t("fileDownloaded"));
   };
 
   const handleRemove = (id: string) => {
     removeDownloadedFile(id);
     toast.success(t("fileRemoved"));
+  };
+
+  const renderFileIcon = (fileType: string) => {
+    if (fileType.includes("PDF") || fileType.includes("pdf")) {
+      return <FilePdf size={36} className="text-red-500" />;
+    } else if (fileType.includes("image") || /\.(jpg|jpeg|png|gif)$/i.test(fileType)) {
+      return <FileImage size={36} className="text-blue-500" />;
+    } else {
+      return <FileDown size={36} className="text-gray-500" />;
+    }
   };
 
   return (
@@ -71,19 +81,24 @@ const Downloads: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pb-2">
-                    <div className="text-sm text-gray-600">
-                      <p>
-                        <span className="font-medium">{t("activity")}: </span>
-                        {file.activityName}
-                      </p>
-                      <p>
-                        <span className="font-medium">{t("fileType")}: </span>
-                        {file.fileType}
-                      </p>
-                      <p>
-                        <span className="font-medium">{t("downloadDate")}: </span>
-                        {file.downloadDate}
-                      </p>
+                    <div className="flex items-start">
+                      <div className="mr-4 flex-shrink-0">
+                        {renderFileIcon(file.fileType)}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <p>
+                          <span className="font-medium">{t("activity")}: </span>
+                          {file.activityName}
+                        </p>
+                        <p>
+                          <span className="font-medium">{t("fileType")}: </span>
+                          {file.fileType}
+                        </p>
+                        <p>
+                          <span className="font-medium">{t("downloadDate")}: </span>
+                          {file.downloadDate}
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter>
