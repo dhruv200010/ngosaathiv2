@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
@@ -112,24 +113,24 @@ const Dashboard = () => {
             </div>
           </div>
           
-          {/* Recent Activities Section */}
-          {recentActivities.length > 0 && (
-            <div className="mt-8">
-              <div className="flex items-center mb-4">
-                <ActivityIcon size={20} className="text-ngo-dark mr-2" />
-                <h2 className="text-xl font-semibold text-ngo-dark">{t("recentActivities")}</h2>
-              </div>
-              
-              <div className="space-y-4">
-                {recentActivities.map(activity => (
-                  <ActivityCard 
-                    key={activity.id} 
-                    activity={activity} 
-                    onEdit={(id) => navigate(`/activity/edit?id=${id}`)}
-                  />
-                ))}
-                
-                {recentActivities.length > 0 && (
+          {/* Recent Activities Section - Always show this section */}
+          <div className="mt-8">
+            <div className="flex items-center mb-4">
+              <ActivityIcon size={20} className="text-ngo-dark mr-2" />
+              <h2 className="text-xl font-semibold text-ngo-dark">{t("recentActivities")}</h2>
+            </div>
+            
+            <div className="space-y-4">
+              {recentActivities.length > 0 ? (
+                <>
+                  {recentActivities.map(activity => (
+                    <ActivityCard 
+                      key={activity.id} 
+                      activity={activity} 
+                      onEdit={(id) => navigate(`/activity/edit?id=${id}`)}
+                    />
+                  ))}
+                  
                   <div className="text-center mt-4">
                     <Button 
                       variant="outline"
@@ -139,10 +140,22 @@ const Dashboard = () => {
                       {t("viewAllActivities")}
                     </Button>
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <Card className="text-center p-4">
+                  <CardContent className="py-6">
+                    <p className="text-gray-500">{t("noRecentActivities")}</p>
+                    <Button 
+                      onClick={handleAddActivity}
+                      className="mt-4 bg-ngo-green text-ngo-dark hover:bg-ngo-green/90"
+                    >
+                      {t("addYourFirstActivity")}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </main>
 

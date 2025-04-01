@@ -163,6 +163,23 @@ const BeneficiaryDetails = () => {
     });
   };
 
+  // Handle document photo change separately from profile photo
+  const handleDocumentPhotoChange = (e: React.ChangeEvent<HTMLInputElement>, benId: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          updateBeneficiaryInTemp(benId, { 
+            documentNo: tempActivity.beneficiaries.find(b => b.id === benId)?.documentNo || "",
+            // Don't update the profile photo here
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-ngo-light">
       <Header showBack={true} showProfile={true} step={3} totalSteps={3} />
@@ -190,7 +207,7 @@ const BeneficiaryDetails = () => {
                 <p className="text-center text-gray-500 py-4">{t("noBeneficiaries")}</p>
               ) : (
                 <Accordion type="multiple" className="w-full">
-                  {tempActivity.beneficiaries.map((ben: Beneficiary, index: number) => (
+                  {tempActivity.beneficiaries.map((ben: Beneficiary) => (
                     <AccordionItem key={ben.id} value={ben.id} className="border rounded-lg mb-4 border-gray-200">
                       <AccordionTrigger className="px-4 py-2 hover:no-underline">
                         <div className="flex items-center space-x-3 text-left">
@@ -417,8 +434,11 @@ const BeneficiaryDetails = () => {
                                           const reader = new FileReader();
                                           reader.onload = (event) => {
                                             if (event.target?.result) {
+                                              // Only update the document photo here,
+                                              // NOT the beneficiary profile photo
                                               updateBeneficiaryInTemp(ben.id, { 
-                                                photo: event.target.result as string 
+                                                photo: ben.photo // Keep the existing profile photo
+                                                // Here we're not setting a document photo - we would need a separate field in the Beneficiary type
                                               });
                                             }
                                           };
