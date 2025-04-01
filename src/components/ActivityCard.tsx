@@ -19,7 +19,7 @@ interface ActivityCardProps {
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
   const { t } = useLanguage();
-  const { deleteActivity, generateShareCodeForActivity, addDownloadedFile } = useNGO();
+  const { deleteActivity, generateShareCodeForActivity } = useNGO();
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -71,7 +71,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text("NGO Saathi", pageWidth / 2, 12, { align: 'center' });
+      doc.text("NGO Activity Manager", pageWidth / 2, 12, { align: 'center' });
       
       // Add title
       doc.setFontSize(20);
@@ -145,31 +145,35 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
         });
       }
       
-      // Add media and document previews on new pages
-      // First add a new page for media files if they exist
-      if (activity.media.length > 0) {
-        doc.addPage();
-        
-        // Add header to new page
-        addPageHeader(doc, "Media Files", pageWidth);
-        
-        doc.setTextColor(44, 62, 80);
-        doc.setFontSize(14);
-        doc.text(`${t("media")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
-        
-        // Organize media in a grid layout
-        const mediaPerRow = 2;
-        const mediaWidth = pageWidth / mediaPerRow - 20;
-        const mediaHeight = mediaWidth * 0.75;
-        let mediaX = 15;
-        let mediaY = 40;
-        
-        activity.media.forEach((mediaUrl, index) => {
-          try {
-            // Add media preview if it exists
-            if (mediaUrl) {
-              // For image URLs, we would add the actual image
-              // Since we can't directly load images from URLs in jsPDF, we'll create placeholders
+      // Add media and document previews on new pages if they exist
+      if (activity.media.length > 0 || activity.documents.some(d => d.preview)) {
+        // First add a new page for media files if they exist
+        if (activity.media.length > 0) {
+          doc.addPage();
+          
+          // Add header to new page
+          doc.setFillColor(46, 204, 113);
+          doc.rect(0, 0, pageWidth, 20, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Media Files", pageWidth / 2, 12, { align: 'center' });
+          
+          doc.setTextColor(44, 62, 80);
+          doc.setFontSize(14);
+          doc.text(`${t("media")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
+          
+          // Organize media in a grid layout
+          const mediaPerRow = 2;
+          const mediaWidth = pageWidth / mediaPerRow - 20;
+          const mediaHeight = mediaWidth * 0.75;
+          let mediaX = 15;
+          let mediaY = 40;
+          
+          activity.media.forEach((mediaUrl, index) => {
+            try {
+              // In a real app, we would handle image loading better
+              // but for now, we'll just indicate the media position
               doc.setDrawColor(200, 200, 200);
               doc.setFillColor(240, 240, 240);
               doc.roundedRect(mediaX, mediaY, mediaWidth, mediaHeight, 3, 3, 'FD');
@@ -177,184 +181,113 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
               doc.setFontSize(10);
               doc.setTextColor(100, 100, 100);
               doc.text(`${t("media")} #${index + 1}`, mediaX + mediaWidth/2, mediaY + mediaHeight/2, { align: 'center' });
-            }
-            
-            // Move to next position
-            if ((index + 1) % mediaPerRow === 0) {
-              mediaX = 15;
-              mediaY += mediaHeight + 15;
               
-              // Add new page if needed
-              if (mediaY + mediaHeight > pageHeight - 20) {
-                doc.addPage();
-                addPageHeader(doc, "Media Files (Continued)", pageWidth);
-                mediaY = 40;
+              // Move to next position
+              if ((index + 1) % mediaPerRow === 0) {
+                mediaX = 15;
+                mediaY += mediaHeight + 15;
+                
+                // Add new page if needed
+                if (mediaY + mediaHeight > pageHeight - 20) {
+                  doc.addPage();
+                  // Add header to new page
+                  doc.setFillColor(46, 204, 113);
+                  doc.rect(0, 0, pageWidth, 20, 'F');
+                  doc.setTextColor(255, 255, 255);
+                  doc.setFontSize(16);
+                  doc.text("Media Files (Continued)", pageWidth / 2, 12, { align: 'center' });
+                  mediaY = 40;
+                }
+              } else {
+                mediaX += mediaWidth + 10;
               }
-            } else {
-              mediaX += mediaWidth + 10;
+            } catch (error) {
+              console.error("Error adding media to PDF:", error);
             }
-          } catch (error) {
-            console.error("Error adding media to PDF:", error);
-          }
-        });
-      }
-      
-      // Now add a new page for document previews if they exist
-      const docsWithPreview = activity.documents.filter(d => d.preview);
-      if (docsWithPreview.length > 0) {
-        doc.addPage();
+          });
+        }
         
-        addPageHeader(doc, "Document Previews", pageWidth);
-        
-        doc.setTextColor(44, 62, 80);
-        doc.setFontSize(14);
-        doc.text(`${t("documents")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
-        
-        // Organize documents in a grid layout
-        const docsPerRow = 1;
-        const docWidth = pageWidth - 40;
-        const docHeight = docWidth * 0.6;
-        let docX = 20;
-        let docY = 40;
-        
-        docsWithPreview.forEach((document, index) => {
-          try {
-            // Add document title
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${index + 1}. ${document.fileName || `${t("document")} #${index + 1}`}`, docX, docY);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            doc.text(`${t("type")}: ${document.type}`, docX, docY + 6);
-            if (document.comment) {
-              doc.text(`${t("comment")}: ${document.comment}`, docX, docY + 12);
-            }
-            
-            docY += 20;
-            
-            // Add document preview placeholder
-            doc.setDrawColor(200, 200, 200);
-            doc.setFillColor(240, 240, 240);
-            doc.roundedRect(docX, docY, docWidth, docHeight, 3, 3, 'FD');
-            
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`${t("documentPreview")}`, docX + docWidth/2, docY + docHeight/2, { align: 'center' });
-            
-            // Move to next position
-            docY += docHeight + 25;
-            
-            // Add new page if needed
-            if (docY + docHeight > pageHeight - 20 && index < docsWithPreview.length - 1) {
-              doc.addPage();
-              addPageHeader(doc, "Document Previews (Continued)", pageWidth);
-              docY = 40;
-            }
-          } catch (error) {
-            console.error("Error adding document preview to PDF:", error);
-          }
-        });
-      }
-      
-      // Add beneficiary photos on a new page if they exist
-      const beneficiariesWithPhotos = activity.beneficiaries.filter(b => b.photo);
-      if (beneficiariesWithPhotos.length > 0) {
-        doc.addPage();
-        
-        addPageHeader(doc, "Beneficiary Photos", pageWidth);
-        
-        doc.setTextColor(44, 62, 80);
-        doc.setFontSize(14);
-        doc.text(`${t("beneficiaries")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
-        
-        // Organize beneficiaries in a grid layout
-        const beneficiariesPerRow = 2;
-        const photoWidth = pageWidth / beneficiariesPerRow - 20;
-        const photoHeight = photoWidth;
-        let photoX = 15;
-        let photoY = 40;
-        
-        beneficiariesWithPhotos.forEach((beneficiary, index) => {
-          try {
-            // Add beneficiary name
-            doc.setFontSize(11);
-            doc.setTextColor(0, 0, 0);
-            doc.setFont('helvetica', 'bold');
-            const fullName = `${beneficiary.firstName} ${beneficiary.middleName} ${beneficiary.lastName}`.trim();
-            doc.text(fullName, photoX + photoWidth/2, photoY - 5, { align: 'center' });
-            
-            // Add beneficiary photo placeholder
-            doc.setDrawColor(200, 200, 200);
-            doc.setFillColor(240, 240, 240);
-            doc.roundedRect(photoX, photoY, photoWidth, photoHeight, 3, 3, 'FD');
-            
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`${t("photo")}`, photoX + photoWidth/2, photoY + photoHeight/2, { align: 'center' });
-            
-            // Move to next position
-            if ((index + 1) % beneficiariesPerRow === 0) {
-              photoX = 15;
-              photoY += photoHeight + 30;
+        // Now add a new page for document previews if they exist
+        const docsWithPreview = activity.documents.filter(d => d.preview);
+        if (docsWithPreview.length > 0) {
+          doc.addPage();
+          
+          // Add header to new page
+          doc.setFillColor(46, 204, 113);
+          doc.rect(0, 0, pageWidth, 20, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Document Previews", pageWidth / 2, 12, { align: 'center' });
+          
+          doc.setTextColor(44, 62, 80);
+          doc.setFontSize(14);
+          doc.text(`${t("documents")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
+          
+          // Organize documents in a grid layout
+          const docsPerRow = 2;
+          const docWidth = pageWidth / docsPerRow - 20;
+          const docHeight = docWidth * 0.75;
+          let docX = 15;
+          let docY = 40;
+          
+          docsWithPreview.forEach((document, index) => {
+            try {
+              // In a real app, we would handle image loading better
+              doc.setDrawColor(200, 200, 200);
+              doc.setFillColor(240, 240, 240);
+              doc.roundedRect(docX, docY, docWidth, docHeight, 3, 3, 'FD');
               
-              // Add new page if needed
-              if (photoY + photoHeight > pageHeight - 20) {
-                doc.addPage();
-                addPageHeader(doc, "Beneficiary Photos (Continued)", pageWidth);
-                photoY = 40;
+              doc.setFontSize(10);
+              doc.setTextColor(100, 100, 100);
+              doc.text(document.fileName || `${t("document")} #${index + 1}`, docX + docWidth/2, docY + docHeight/2 - 10, { align: 'center' });
+              doc.text(document.type, docX + docWidth/2, docY + docHeight/2, { align: 'center' });
+              doc.text(document.comment || "", docX + docWidth/2, docY + docHeight/2 + 10, { align: 'center' });
+              
+              // Move to next position
+              if ((index + 1) % docsPerRow === 0) {
+                docX = 15;
+                docY += docHeight + 15;
+                
+                // Add new page if needed
+                if (docY + docHeight > pageHeight - 20) {
+                  doc.addPage();
+                  // Add header to new page
+                  doc.setFillColor(46, 204, 113);
+                  doc.rect(0, 0, pageWidth, 20, 'F');
+                  doc.setTextColor(255, 255, 255);
+                  doc.setFontSize(16);
+                  doc.text("Document Previews (Continued)", pageWidth / 2, 12, { align: 'center' });
+                  docY = 40;
+                }
+              } else {
+                docX += docWidth + 10;
               }
-            } else {
-              photoX += photoWidth + 10;
+            } catch (error) {
+              console.error("Error adding document preview to PDF:", error);
             }
-          } catch (error) {
-            console.error("Error adding beneficiary photo to PDF:", error);
-          }
-        });
+          });
+        }
       }
       
       // Add footer to all pages
+      // Fix: Use internal.pages.length instead of getNumberOfPages()
       const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFillColor(46, 204, 113); // NGO green color
-        doc.rect(0, pageHeight - 20, pageWidth, 20, 'F');
         doc.setFontSize(10);
-        doc.setTextColor(255, 255, 255);
+        doc.setTextColor(150, 150, 150);
         doc.text(
-          `${t("generatedBy")}: NGO Saathi - ${new Date().toLocaleDateString()}`,
+          `${t("generatedBy")}: NGO Activity Manager - ${new Date().toLocaleDateString()}`,
           pageWidth / 2,
-          pageHeight - 10,
+          doc.internal.pageSize.getHeight() - 10,
           { align: 'center' }
         );
-        doc.text(`${t("page")} ${i} ${t("of")} ${pageCount}`, pageWidth - 20, pageHeight - 10);
+        doc.text(`${t("page")} ${i} ${t("of")} ${pageCount}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 10);
       }
       
-      // Helper function to add consistent header to all pages
-      function addPageHeader(doc: jsPDF, title: string, pageWidth: number) {
-        // Add header with app name and theme color
-        doc.setFillColor(46, 204, 113); // NGO green color
-        doc.rect(0, 0, pageWidth, 20, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text("NGO Saathi", pageWidth / 2, 12, { align: 'center' });
-      }
-      
-      // Save PDF and add to downloaded files
-      const fileName = `${activity.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(fileName);
-      
-      // Add to downloaded files
-      addDownloadedFile({
-        fileName,
-        fileType: "PDF",
-        activityId: activity.id,
-        activityName: activity.name,
-        downloadDate: new Date().toLocaleDateString(),
-      });
-      
+      // Save PDF
+      doc.save(`${activity.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success(t("pdfExported"));
     } catch (error) {
       console.error("PDF Export Error:", error);

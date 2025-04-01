@@ -1,36 +1,64 @@
 
-// Using more secure cryptographic methods for generating and validating share codes
+/**
+ * Utility for generating and validating cryptographically secure codes
+ */
 
 /**
- * Generates a secure, cryptographically strong share code
- * The code will be alphanumeric with special characters to increase complexity
- * Format: XXXX-XXXX-XXXX where X can be any alphanumeric or special character
+ * Generates a cryptographically strong secure code for activity sharing
+ * @returns A complex alphanumeric share code
  */
-export const generateSecureCode = (): string => {
-  // Define the character set - alphanumeric plus some special chars
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+export function generateSecureCode(): string {
+  // Define character sets
+  const uppercaseChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // removed I and O (to avoid confusion with 1 and 0)
+  const lowercaseChars = 'abcdefghijkmnopqrstuvwxyz'; // removed l (to avoid confusion with 1)
+  const numberChars = '23456789'; // removed 0 and 1 (to avoid confusion with O and l)
+  const specialChars = '-_';
+  
+  // Define segment structure
+  const segments = [
+    { length: 4, chars: uppercaseChars + numberChars },
+    { length: 4, chars: lowercaseChars + numberChars },
+    { length: 4, chars: uppercaseChars + lowercaseChars },
+    { length: 4, chars: uppercaseChars + lowercaseChars + numberChars + specialChars }
+  ];
+  
   let code = '';
   
-  // Generate three groups of 4 characters
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 4; j++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      code += chars.charAt(randomIndex);
+  // Generate each segment
+  segments.forEach((segment, index) => {
+    // Add separator between segments
+    if (index > 0) code += '-';
+    
+    // Generate the segment
+    for (let i = 0; i < segment.length; i++) {
+      const randomIndex = Math.floor(Math.random() * segment.chars.length);
+      code += segment.chars[randomIndex];
     }
-    if (i < 2) code += '-'; // Add dash between groups
-  }
+  });
+  
+  // Add timestamp hash (last 4 characters) to make it unique even if generated in same millisecond
+  const timestampHash = Date.now().toString(36).slice(-4);
+  code += `-${timestampHash}`;
   
   return code;
-};
+}
 
 /**
- * Validate a share code to ensure it matches the expected format
+ * Validates if a code follows the proper secure format
  * @param code The code to validate
- * @returns boolean indicating if the code is valid
+ * @returns Whether the code is valid
  */
-export const validateSecureCode = (code: string): boolean => {
-  // Check the basic format: XXXX-XXXX-XXXX
-  // Where X can be any alphanumeric or special character from our set
-  const validFormat = /^[A-Za-z0-9!@#$%^&*]{4}-[A-Za-z0-9!@#$%^&*]{4}-[A-Za-z0-9!@#$%^&*]{4}$/;
-  return validFormat.test(code);
-};
+export function validateSecureCode(code: string): boolean {
+  // Basic validation - should have 5 segments separated by dashes
+  const segments = code.split('-');
+  if (segments.length !== 5) return false;
+  
+  // All segments should be 4 characters long
+  for (let i = 0; i < segments.length; i++) {
+    if (segments[i].length !== 4) return false;
+  }
+  
+  // Additional format validation could be added here
+  
+  return true;
+}

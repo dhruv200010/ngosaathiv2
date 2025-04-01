@@ -1,9 +1,9 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
 
+  // Get recent activities (last 2)
   const recentActivities = [...activities].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   ).slice(0, 2);
@@ -111,23 +112,24 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="mt-8">
-            <div className="flex items-center mb-4">
-              <ActivityIcon size={20} className="text-ngo-dark mr-2" />
-              <h2 className="text-xl font-semibold text-ngo-dark">{t("recentActivities")}</h2>
-            </div>
-            
-            <div className="space-y-4">
-              {recentActivities.length > 0 ? (
-                <>
-                  {recentActivities.map(activity => (
-                    <ActivityCard 
-                      key={activity.id} 
-                      activity={activity} 
-                      onEdit={(id) => navigate(`/activity/edit?id=${id}`)}
-                    />
-                  ))}
-                  
+          {/* Recent Activities Section */}
+          {recentActivities.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center mb-4">
+                <ActivityIcon size={20} className="text-ngo-dark mr-2" />
+                <h2 className="text-xl font-semibold text-ngo-dark">{t("recentActivities")}</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {recentActivities.map(activity => (
+                  <ActivityCard 
+                    key={activity.id} 
+                    activity={activity} 
+                    onEdit={(id) => navigate(`/activity/edit?id=${id}`)}
+                  />
+                ))}
+                
+                {recentActivities.length > 0 && (
                   <div className="text-center mt-4">
                     <Button 
                       variant="outline"
@@ -137,28 +139,14 @@ const Dashboard = () => {
                       {t("viewAllActivities")}
                     </Button>
                   </div>
-                </>
-              ) : (
-                <Card className="text-center p-6">
-                  <CardContent className="pt-6 flex flex-col items-center">
-                    <ActivityIcon size={48} className="text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-700 mb-2">{t("noActivitiesYet")}</h3>
-                    <p className="text-gray-500 mb-4">{t("startByAddingActivity")}</p>
-                    <Button 
-                      onClick={handleAddActivity}
-                      className="bg-ngo-green text-ngo-dark hover:bg-ngo-green/90"
-                    >
-                      <PlusCircle size={16} className="mr-2" />
-                      {t("addActivity")}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
 
+      {/* Import Activity Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <DialogContent>
           <DialogHeader>
