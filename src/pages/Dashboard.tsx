@@ -1,9 +1,9 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
@@ -18,7 +18,6 @@ const Dashboard = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
 
-  // Get recent activities (last 2)
   const recentActivities = [...activities].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   ).slice(0, 2);
@@ -112,7 +111,6 @@ const Dashboard = () => {
             </div>
           </div>
           
-          {/* Recent Activities Section - Always show, even when empty */}
           <div className="mt-8">
             <div className="flex items-center mb-4">
               <ActivityIcon size={20} className="text-ngo-dark mr-2" />
@@ -161,7 +159,6 @@ const Dashboard = () => {
         </div>
       </main>
 
-      {/* Import Activity Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <DialogContent>
           <DialogHeader>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
@@ -6,7 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileDown, Trash2, FilePdf, FileImage } from "lucide-react";
+import { FileDown, Trash2, File, FileImage } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 const Downloads: React.FC = () => {
@@ -26,7 +25,7 @@ const Downloads: React.FC = () => {
 
   const renderFileIcon = (fileType: string) => {
     if (fileType.includes("PDF") || fileType.includes("pdf")) {
-      return <FilePdf size={36} className="text-red-500" />;
+      return <File size={36} className="text-red-500" />;
     } else if (fileType.includes("image") || /\.(jpg|jpeg|png|gif)$/i.test(fileType)) {
       return <FileImage size={36} className="text-blue-500" />;
     } else {
