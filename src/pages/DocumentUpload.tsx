@@ -25,6 +25,8 @@ const DocumentUpload = () => {
     { value: "receipt", label: t("receipt") },
     { value: "invoice", label: t("invoice") },
     { value: "cashVoucher", label: t("cashVoucher") },
+    { value: "agenda", label: t("agenda") },
+    { value: "resolution", label: t("resolution") },
     { value: "other", label: t("other") },
   ];
 
@@ -142,7 +144,7 @@ const DocumentUpload = () => {
                             value={doc.type}
                             onValueChange={(value) => 
                               updateDocumentInTemp(doc.id, { 
-                                type: value as "bill" | "receipt" | "invoice" | "cashVoucher" | "other"
+                                type: value as "bill" | "receipt" | "invoice" | "cashVoucher" | "agenda" | "resolution" | "other"
                               })
                             }
                           >

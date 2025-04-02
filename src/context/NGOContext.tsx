@@ -34,7 +34,7 @@ export interface Document {
   id: string;
   file: File | null;
   fileName: string;
-  type: "bill" | "receipt" | "invoice" | "cashVoucher" | "other";
+  type: "bill" | "receipt" | "invoice" | "cashVoucher" | "agenda" | "resolution" | "other";
   comment: string;
   preview?: string; // Added preview field for document preview
 }
