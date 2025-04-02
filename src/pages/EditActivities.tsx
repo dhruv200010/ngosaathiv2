@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -8,16 +8,46 @@ import Header from "@/components/Header";
 import ActivityCard from "@/components/ActivityCard";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
-import { PlusCircle, Import } from "lucide-react";
+import { PlusCircle, Import, Download } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { validateSecureCode } from "@/utils/codeGenerator";
 
 const EditActivities = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { activities, startNewActivity, getActivityByCode, addActivity, startEditingActivity } = useNGO();
+  const { 
+    activities, 
+    startNewActivity, 
+    getActivityByCode, 
+    addActivity, 
+    startEditingActivity,
+    addDownloadedFile
+  } = useNGO();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
+
+  // Add a sample download for testing, only once
+  useEffect(() => {
+    // This is just for testing the downloads functionality
+    const addTestDownload = () => {
+      if (activities && activities.length > 0) {
+        const activity = activities[0];
+        const downloadItem = {
+          fileName: "Sample Report.pdf",
+          fileType: "PDF Report",
+          activityId: activity.id,
+          activityName: activity.name || "Activity Report",
+          downloadDate: new Date().toLocaleDateString(),
+        };
+        
+        console.log("Adding test download:", downloadItem);
+        addDownloadedFile(downloadItem);
+      }
+    };
+    
+    // Uncomment this line to add a test download
+    // addTestDownload();
+  }, [activities, addDownloadedFile]);
 
   const handleAddActivity = () => {
     startNewActivity();
@@ -31,6 +61,20 @@ const EditActivities = () => {
 
   const handleImportActivity = () => {
     setImportDialogOpen(true);
+  };
+
+  const handleDownloadReport = (activityId: string, activityName: string) => {
+    const downloadItem = {
+      fileName: `${activityName || "Activity"} Report.pdf`,
+      fileType: "PDF Report",
+      activityId: activityId,
+      activityName: activityName || "Activity Report",
+      downloadDate: new Date().toLocaleDateString(),
+    };
+    
+    console.log("Adding download:", downloadItem);
+    addDownloadedFile(downloadItem);
+    toast.success(t("reportDownloaded"));
   };
 
   const processImport = () => {
@@ -104,7 +148,19 @@ const EditActivities = () => {
                 <ActivityCard 
                   key={activity.id} 
                   activity={activity} 
-                  onEdit={() => handleEditActivity(activity.id)} 
+                  onEdit={() => handleEditActivity(activity.id)}
+                  onMoreActions={() => (
+                    <div className="px-1 py-1">
+                      <Button
+                        className="w-full justify-start text-left text-sm px-2 py-1.5 hover:bg-gray-100"
+                        variant="ghost"
+                        onClick={() => handleDownloadReport(activity.id, activity.name)}
+                      >
+                        <Download size={16} className="mr-2" />
+                        {t("downloadReport")}
+                      </Button>
+                    </div>
+                  )}
                 />
               ))
             )}

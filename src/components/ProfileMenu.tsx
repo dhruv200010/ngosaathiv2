@@ -14,6 +14,8 @@ const ProfileMenu: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
   const { profile, downloadedFiles } = useNGO();
 
+  console.log("Downloaded files in ProfileMenu:", downloadedFiles); // Debug log
+
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
@@ -76,7 +78,7 @@ const ProfileMenu: React.FC = () => {
                 <Download size={16} className="mr-2" />
                 {t("downloads")}
               </div>
-              {downloadedFiles && downloadedFiles.length > 0 && (
+              {Array.isArray(downloadedFiles) && downloadedFiles.length > 0 && (
                 <Badge variant="outline" className="bg-ngo-green text-white text-xs">
                   {downloadedFiles.length}
                 </Badge>

@@ -14,6 +14,8 @@ const Downloads: React.FC = () => {
   const { downloadedFiles, removeDownloadedFile } = useNGO();
   const navigate = useNavigate();
 
+  console.log("Downloaded files in Downloads page:", downloadedFiles); // Debug log
+
   const handleDownload = (fileName: string) => {
     // In a real app, this would download the actual file
     toast.success(t("fileDownloaded"));
@@ -33,7 +35,7 @@ const Downloads: React.FC = () => {
             {t("downloads")}
           </h1>
 
-          {downloadedFiles.length === 0 ? (
+          {!Array.isArray(downloadedFiles) || downloadedFiles.length === 0 ? (
             <Card className="text-center p-8">
               <CardContent className="pt-6">
                 <div className="flex justify-center mb-4">

@@ -113,6 +113,7 @@ interface NGOContextType {
   generateShareCodeForActivity: (id: string) => string;
   addDownloadedFile: (file: Omit<DownloadedFile, 'id'>) => void;
   removeDownloadedFile: (id: string) => void;
+  clearAllDownloadedFiles: () => void;
 }
 
 const NGOContext = createContext<NGOContextType | undefined>(undefined);
@@ -137,8 +138,16 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
   });
 
   const [downloadedFiles, setDownloadedFiles] = useState<DownloadedFile[]>(
-    () => getFromLocalStorage<DownloadedFile[]>(STORAGE_KEYS.DOWNLOADED_FILES, [])
+    () => {
+      const files = getFromLocalStorage<DownloadedFile[]>(STORAGE_KEYS.DOWNLOADED_FILES, []);
+      console.log("Initializing downloadedFiles state:", files);
+      return Array.isArray(files) ? files : [];
+    }
   );
+
+  useEffect(() => {
+    console.log("downloadedFiles updated:", downloadedFiles);
+  }, [downloadedFiles]);
 
   useEffect(() => {
     saveToLocalStorage(STORAGE_KEYS.PROFILE, profile);
@@ -325,11 +334,28 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
       ...file,
       id: generateUniqueId(),
     };
-    setDownloadedFiles(prev => [newFile, ...prev]);
+    console.log("Adding downloaded file:", newFile);
+    setDownloadedFiles(prev => {
+      const updatedFiles = [newFile, ...prev];
+      console.log("Updated downloadedFiles:", updatedFiles);
+      saveToLocalStorage(STORAGE_KEYS.DOWNLOADED_FILES, updatedFiles);
+      return updatedFiles;
+    });
   };
 
   const removeDownloadedFile = (id: string) => {
-    setDownloadedFiles(prev => prev.filter(file => file.id !== id));
+    console.log("Removing downloaded file with id:", id);
+    setDownloadedFiles(prev => {
+      const updatedFiles = prev.filter(file => file.id !== id);
+      console.log("Updated downloadedFiles after removal:", updatedFiles);
+      return updatedFiles;
+    });
+  };
+
+  const clearAllDownloadedFiles = () => {
+    setDownloadedFiles([]);
+    saveToLocalStorage(STORAGE_KEYS.DOWNLOADED_FILES, []);
+    console.log("All downloaded files cleared");
   };
 
   return (
@@ -361,6 +387,7 @@ export const NGOProvider: React.FC<NGOProviderProps> = ({ children }) => {
         generateShareCodeForActivity,
         addDownloadedFile,
         removeDownloadedFile,
+        clearAllDownloadedFiles,
       }}
     >
       {children}

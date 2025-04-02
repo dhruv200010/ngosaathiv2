@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
 
 export const saveToLocalStorage = <T>(key: string, data: T): void => {
   try {
+    console.log(`Saving to localStorage: ${key}`, data); // Debug log
     localStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
     console.error("Error saving to localStorage:", error);
@@ -22,7 +23,9 @@ export const saveToLocalStorage = <T>(key: string, data: T): void => {
 export const getFromLocalStorage = <T>(key: string, defaultValue: T): T => {
   try {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    const parsedItem = item ? JSON.parse(item) : defaultValue;
+    console.log(`Getting from localStorage: ${key}`, parsedItem); // Debug log
+    return parsedItem;
   } catch (error) {
     console.error("Error getting from localStorage:", error);
     return defaultValue;
