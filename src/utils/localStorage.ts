@@ -1,3 +1,4 @@
+
 import { Activity, Beneficiary, Document, NGOProfile } from "@/context/NGOContext";
 
 const STORAGE_PREFIX = "ngo_saathi_";

@@ -76,7 +76,7 @@ const ProfileMenu: React.FC = () => {
                 <Download size={16} className="mr-2" />
                 {t("downloads")}
               </div>
-              {downloadedFiles.length > 0 && (
+              {downloadedFiles && downloadedFiles.length > 0 && (
                 <Badge variant="outline" className="bg-ngo-green text-white text-xs">
                   {downloadedFiles.length}
                 </Badge>
