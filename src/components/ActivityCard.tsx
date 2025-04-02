@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, FileDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -15,9 +14,10 @@ import autoTable from "jspdf-autotable";
 interface ActivityCardProps {
   activity: Activity;
   onEdit?: (id: string) => void;
+  onMoreActions?: () => React.ReactNode;
 }
 
-const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
+const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onMoreActions }) => {
   const { t } = useLanguage();
   const { deleteActivity, generateShareCodeForActivity } = useNGO();
   const navigate = useNavigate();
@@ -368,6 +368,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit }) => {
               </>
             )}
           </Button>
+          {onMoreActions && onMoreActions()}
         </CardFooter>
         
         {showDetails && (

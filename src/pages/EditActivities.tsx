@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -26,9 +25,7 @@ const EditActivities = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
 
-  // Add a sample download for testing, only once
   useEffect(() => {
-    // This is just for testing the downloads functionality
     const addTestDownload = () => {
       if (activities && activities.length > 0) {
         const activity = activities[0];
@@ -45,8 +42,7 @@ const EditActivities = () => {
       }
     };
     
-    // Uncomment this line to add a test download
-    // addTestDownload();
+    addTestDownload();
   }, [activities, addDownloadedFile]);
 
   const handleAddActivity = () => {
@@ -83,7 +79,6 @@ const EditActivities = () => {
       return;
     }
 
-    // Validate code format first
     if (!validateSecureCode(importCode)) {
       toast.error(t("invalidCodeFormat"));
       return;
@@ -102,6 +97,21 @@ const EditActivities = () => {
     } else {
       toast.error(t("invalidCode"));
     }
+  };
+
+  const renderMoreActions = (activityId: string, activityName: string) => {
+    return (
+      <div className="px-1 py-1">
+        <Button
+          className="w-full justify-start text-left text-sm px-2 py-1.5 hover:bg-gray-100"
+          variant="ghost"
+          onClick={() => handleDownloadReport(activityId, activityName)}
+        >
+          <Download size={16} className="mr-2" />
+          {t("downloadReport")}
+        </Button>
+      </div>
+    );
   };
 
   return (
@@ -149,18 +159,7 @@ const EditActivities = () => {
                   key={activity.id} 
                   activity={activity} 
                   onEdit={() => handleEditActivity(activity.id)}
-                  onMoreActions={() => (
-                    <div className="px-1 py-1">
-                      <Button
-                        className="w-full justify-start text-left text-sm px-2 py-1.5 hover:bg-gray-100"
-                        variant="ghost"
-                        onClick={() => handleDownloadReport(activity.id, activity.name)}
-                      >
-                        <Download size={16} className="mr-2" />
-                        {t("downloadReport")}
-                      </Button>
-                    </div>
-                  )}
+                  onMoreActions={() => renderMoreActions(activity.id, activity.name)}
                 />
               ))
             )}
@@ -168,7 +167,6 @@ const EditActivities = () => {
         </div>
       </main>
 
-      {/* Import Activity Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <DialogContent>
           <DialogHeader>
