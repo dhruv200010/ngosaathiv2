@@ -59,36 +59,94 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
     toast.success(t("activityShared"));
   };
 
-  const exportToPDF = () => {
+  const addImageToPDF = async (doc, imageUrl, x, y, width, height, caption = "") => {
+    try {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            
+            const dataUrl = canvas.toDataURL("image/jpeg");
+            
+            doc.addImage(dataUrl, "JPEG", x, y, width, height);
+            
+            if (caption) {
+              doc.setFontSize(10);
+              doc.setTextColor(100, 100, 100);
+              doc.text(caption, x + width/2, y + height + 5, { align: 'center' });
+            }
+            
+            resolve(true);
+          } catch (err) {
+            console.error("Error converting image:", err);
+            reject(err);
+          }
+        };
+        
+        img.onerror = (err) => {
+          console.error("Error loading image:", err);
+          reject(err);
+        };
+        
+        img.src = imageUrl;
+        
+        setTimeout(() => {
+          reject(new Error("Image load timeout"));
+        }, 10000);
+      });
+    } catch (error) {
+      console.error("Error in addImageToPDF:", error);
+      
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(240, 240, 240);
+      doc.roundedRect(x, y, width, height, 3, 3, 'FD');
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(t("imageLoadFailed"), x + width/2, y + height/2, { align: 'center' });
+      
+      if (caption) {
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(caption, x + width/2, y + height + 5, { align: 'center' });
+      }
+      
+      return Promise.resolve(false);
+    }
+  };
+
+  const exportToPDF = async () => {
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      // Add app branding and styling
-      // Header with app name and theme color
-      doc.setFillColor(46, 204, 113); // NGO green color
+      doc.setFillColor(46, 204, 113);
       doc.rect(0, 0, pageWidth, 20, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text("NGO Activity Manager", pageWidth / 2, 12, { align: 'center' });
       
-      // Add title
       doc.setFontSize(20);
       doc.setTextColor(44, 62, 80);
       doc.setFont('helvetica', 'bold');
       const title = activity.name;
       doc.text(title, pageWidth / 2, 35, { align: 'center' });
       
-      // Add date and location
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 100, 100);
       doc.text(`${t("date")}: ${activity.date}`, 14, 45);
       doc.text(`${t("location")}: ${activity.location}`, 14, 52);
       
-      // Add description
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text(`${t("description")}:`, 14, 62);
@@ -96,11 +154,9 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
       const splitDescription = doc.splitTextToSize(activity.description, pageWidth - 28);
       doc.text(splitDescription, 14, 69);
       
-      // Add contact person
       let yPos = 69 + (splitDescription.length * 7);
       doc.text(`${t("personOfContact")}: ${activity.contactPerson.name} (${activity.contactPerson.contactNo})`, 14, yPos);
       
-      // Add beneficiaries table
       yPos += 15;
       doc.text(`${t("beneficiaries")} (${activity.beneficiaries.length})`, 14, yPos);
       yPos += 5;
@@ -126,7 +182,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         yPos = (doc as any).lastAutoTable.finalY + 10;
       }
       
-      // Add documents table
       doc.text(`${t("documents")} (${activity.documents.length})`, 14, yPos);
       yPos += 5;
       
@@ -146,13 +201,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         });
       }
       
-      // Add media and document previews on new pages if they exist
       if (activity.media.length > 0 || activity.documents.some(d => d.preview)) {
-        // First add a new page for media files if they exist
         if (activity.media.length > 0) {
           doc.addPage();
           
-          // Add header to new page
           doc.setFillColor(46, 204, 113);
           doc.rect(0, 0, pageWidth, 20, 'F');
           doc.setTextColor(255, 255, 255);
@@ -164,34 +216,32 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
           doc.setFontSize(14);
           doc.text(`${t("media")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
           
-          // Organize media in a grid layout
           const mediaPerRow = 2;
-          const mediaWidth = pageWidth / mediaPerRow - 20;
+          const mediaWidth = (pageWidth - 40) / mediaPerRow;
           const mediaHeight = mediaWidth * 0.75;
-          let mediaX = 15;
+          let mediaX = 20;
           let mediaY = 40;
           
-          activity.media.forEach((mediaUrl, index) => {
+          for (let i = 0; i < activity.media.length; i++) {
+            const mediaUrl = activity.media[i];
+            
             try {
-              // In a real app, we would handle image loading better
-              // but for now, we'll just indicate the media position
-              doc.setDrawColor(200, 200, 200);
-              doc.setFillColor(240, 240, 240);
-              doc.roundedRect(mediaX, mediaY, mediaWidth, mediaHeight, 3, 3, 'FD');
+              await addImageToPDF(
+                doc, 
+                mediaUrl, 
+                mediaX, 
+                mediaY, 
+                mediaWidth, 
+                mediaHeight, 
+                `${t("media")} #${i + 1}`
+              );
               
-              doc.setFontSize(10);
-              doc.setTextColor(100, 100, 100);
-              doc.text(`${t("media")} #${index + 1}`, mediaX + mediaWidth/2, mediaY + mediaHeight/2, { align: 'center' });
-              
-              // Move to next position
-              if ((index + 1) % mediaPerRow === 0) {
-                mediaX = 15;
-                mediaY += mediaHeight + 15;
+              if ((i + 1) % mediaPerRow === 0) {
+                mediaX = 20;
+                mediaY += mediaHeight + 20;
                 
-                // Add new page if needed
                 if (mediaY + mediaHeight > pageHeight - 20) {
                   doc.addPage();
-                  // Add header to new page
                   doc.setFillColor(46, 204, 113);
                   doc.rect(0, 0, pageWidth, 20, 'F');
                   doc.setTextColor(255, 255, 255);
@@ -204,16 +254,15 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
               }
             } catch (error) {
               console.error("Error adding media to PDF:", error);
+              continue;
             }
-          });
+          }
         }
         
-        // Now add a new page for document previews if they exist
         const docsWithPreview = activity.documents.filter(d => d.preview);
         if (docsWithPreview.length > 0) {
           doc.addPage();
           
-          // Add header to new page
           doc.setFillColor(46, 204, 113);
           doc.rect(0, 0, pageWidth, 20, 'F');
           doc.setTextColor(255, 255, 255);
@@ -225,35 +274,44 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
           doc.setFontSize(14);
           doc.text(`${t("documents")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
           
-          // Organize documents in a grid layout
           const docsPerRow = 2;
-          const docWidth = pageWidth / docsPerRow - 20;
+          const docWidth = (pageWidth - 40) / docsPerRow;
           const docHeight = docWidth * 0.75;
-          let docX = 15;
+          let docX = 20;
           let docY = 40;
           
-          docsWithPreview.forEach((document, index) => {
+          for (let i = 0; i < docsWithPreview.length; i++) {
+            const document = docsWithPreview[i];
+            
             try {
-              // In a real app, we would handle image loading better
-              doc.setDrawColor(200, 200, 200);
-              doc.setFillColor(240, 240, 240);
-              doc.roundedRect(docX, docY, docWidth, docHeight, 3, 3, 'FD');
-              
-              doc.setFontSize(10);
-              doc.setTextColor(100, 100, 100);
-              doc.text(document.fileName || `${t("document")} #${index + 1}`, docX + docWidth/2, docY + docHeight/2 - 10, { align: 'center' });
-              doc.text(document.type, docX + docWidth/2, docY + docHeight/2, { align: 'center' });
-              doc.text(document.comment || "", docX + docWidth/2, docY + docHeight/2 + 10, { align: 'center' });
-              
-              // Move to next position
-              if ((index + 1) % docsPerRow === 0) {
-                docX = 15;
-                docY += docHeight + 15;
+              if (document.preview) {
+                await addImageToPDF(
+                  doc, 
+                  document.preview, 
+                  docX, 
+                  docY, 
+                  docWidth, 
+                  docHeight, 
+                  document.fileName || `${t("document")} #${i + 1}`
+                );
+              } else {
+                doc.setDrawColor(200, 200, 200);
+                doc.setFillColor(240, 240, 240);
+                doc.roundedRect(docX, docY, docWidth, docHeight, 3, 3, 'FD');
                 
-                // Add new page if needed
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(document.fileName || `${t("document")} #${i + 1}`, docX + docWidth/2, docY + docHeight/2 - 10, { align: 'center' });
+                doc.text(document.type, docX + docWidth/2, docY + docHeight/2, { align: 'center' });
+                doc.text(document.comment || "", docX + docWidth/2, docY + docHeight/2 + 10, { align: 'center' });
+              }
+              
+              if ((i + 1) % docsPerRow === 0) {
+                docX = 20;
+                docY += docHeight + 20;
+                
                 if (docY + docHeight > pageHeight - 20) {
                   doc.addPage();
-                  // Add header to new page
                   doc.setFillColor(46, 204, 113);
                   doc.rect(0, 0, pageWidth, 20, 'F');
                   doc.setTextColor(255, 255, 255);
@@ -266,13 +324,12 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
               }
             } catch (error) {
               console.error("Error adding document preview to PDF:", error);
+              continue;
             }
-          });
+          }
         }
       }
       
-      // Add footer to all pages
-      // Fix: Use internal.pages.length instead of getNumberOfPages()
       const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -287,7 +344,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         doc.text(`${t("page")} ${i} ${t("of")} ${pageCount}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 10);
       }
       
-      // Save PDF
       if (onDownload) {
         onDownload("PDF Report");
       }
@@ -397,7 +453,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         )}
       </Card>
 
-      {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent>
           <DialogHeader>
@@ -420,7 +475,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
