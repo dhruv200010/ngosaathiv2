@@ -21,33 +21,9 @@ const EditActivities = () => {
     getActivityByCode, 
     addActivity, 
     startEditingActivity,
-    addDownloadedFile
   } = useNGO();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
-  const [hasAddedTestDownload, setHasAddedTestDownload] = useState(false);
-
-  // Only run this once by using the hasAddedTestDownload state
-  useEffect(() => {
-    const addTestDownload = () => {
-      if (!hasAddedTestDownload && activities && activities.length > 0) {
-        const activity = activities[0];
-        const downloadItem = {
-          fileName: "Sample Report.pdf",
-          fileType: "PDF Report",
-          activityId: activity.id,
-          activityName: activity.name || "Activity Report",
-          downloadDate: new Date().toLocaleDateString(),
-        };
-        
-        console.log("Adding test download:", downloadItem);
-        addDownloadedFile(downloadItem);
-        setHasAddedTestDownload(true);
-      }
-    };
-    
-    addTestDownload();
-  }, [activities, addDownloadedFile, hasAddedTestDownload]);
 
   const handleAddActivity = () => {
     startNewActivity();
