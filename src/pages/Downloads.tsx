@@ -17,7 +17,8 @@ const Downloads: React.FC = () => {
   console.log("Downloaded files in Downloads page:", downloadedFiles); // Debug log
 
   const handleDownload = (fileName: string) => {
-    // In a real app, this would download the actual file
+    // In a real app, this would download the actual file from storage or generate it
+    // For demonstration purposes, we'll just show a success message
     toast.success(t("fileDownloaded"));
   };
 

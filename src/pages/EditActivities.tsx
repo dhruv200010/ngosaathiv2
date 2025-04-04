@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -21,6 +21,7 @@ const EditActivities = () => {
     getActivityByCode, 
     addActivity, 
     startEditingActivity,
+    addDownloadedFile
   } = useNGO();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
@@ -63,6 +64,22 @@ const EditActivities = () => {
     } else {
       toast.error(t("invalidCode"));
     }
+  };
+
+  // We can use this function when we want to add any downloaded file to the downloads section
+  const handleDownload = (activity, fileName, fileType) => {
+    // In a real app, this would trigger the actual file download
+    // For now, we'll just add it to downloadedFiles
+    const downloadItem = {
+      fileName: fileName,
+      fileType: fileType,
+      activityId: activity.id,
+      activityName: activity.name || "Activity",
+      downloadDate: new Date().toLocaleDateString(),
+    };
+    
+    addDownloadedFile(downloadItem);
+    toast.success(t("fileAddedToDownloads"));
   };
 
   return (
@@ -110,6 +127,11 @@ const EditActivities = () => {
                   key={activity.id} 
                   activity={activity} 
                   onEdit={() => handleEditActivity(activity.id)}
+                  onDownload={(fileType) => handleDownload(
+                    activity, 
+                    `${activity.name}_Report.pdf`, 
+                    fileType || "PDF Report"
+                  )}
                 />
               ))
             )}
