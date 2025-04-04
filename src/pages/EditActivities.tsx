@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import ActivityCard from "@/components/ActivityCard";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNGO } from "@/context/NGOContext";
-import { PlusCircle, Import, Download } from "lucide-react";
+import { PlusCircle, Import } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { validateSecureCode } from "@/utils/codeGenerator";
 
@@ -63,22 +63,6 @@ const EditActivities = () => {
     setImportDialogOpen(true);
   };
 
-  const handleDownloadReport = (activityId: string, activityName: string) => {
-    if (!activityId || !activityName) return;
-    
-    const downloadItem = {
-      fileName: `${activityName || "Activity"} Report.pdf`,
-      fileType: "PDF Report",
-      activityId: activityId,
-      activityName: activityName || "Activity Report",
-      downloadDate: new Date().toLocaleDateString(),
-    };
-    
-    console.log("Adding download:", downloadItem);
-    addDownloadedFile(downloadItem);
-    toast.success(t("reportDownloaded"));
-  };
-
   const processImport = () => {
     if (!importCode.trim()) {
       toast.error(t("enterValidCode"));
@@ -103,21 +87,6 @@ const EditActivities = () => {
     } else {
       toast.error(t("invalidCode"));
     }
-  };
-
-  const renderMoreActions = (activityId: string, activityName: string) => {
-    return (
-      <div className="px-1 py-1">
-        <Button
-          className="w-full justify-start text-left text-sm px-2 py-1.5 hover:bg-gray-100"
-          variant="ghost"
-          onClick={() => handleDownloadReport(activityId, activityName)}
-        >
-          <Download size={16} className="mr-2" />
-          {t("downloadReport")}
-        </Button>
-      </div>
-    );
   };
 
   return (
@@ -165,7 +134,6 @@ const EditActivities = () => {
                   key={activity.id} 
                   activity={activity} 
                   onEdit={() => handleEditActivity(activity.id)}
-                  onMoreActions={() => renderMoreActions(activity.id, activity.name)}
                 />
               ))
             )}
