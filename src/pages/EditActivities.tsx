@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,10 +25,12 @@ const EditActivities = () => {
   } = useNGO();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importCode, setImportCode] = useState("");
+  const [hasAddedTestDownload, setHasAddedTestDownload] = useState(false);
 
+  // Only run this once by using the hasAddedTestDownload state
   useEffect(() => {
     const addTestDownload = () => {
-      if (activities && activities.length > 0) {
+      if (!hasAddedTestDownload && activities && activities.length > 0) {
         const activity = activities[0];
         const downloadItem = {
           fileName: "Sample Report.pdf",
@@ -39,11 +42,12 @@ const EditActivities = () => {
         
         console.log("Adding test download:", downloadItem);
         addDownloadedFile(downloadItem);
+        setHasAddedTestDownload(true);
       }
     };
     
     addTestDownload();
-  }, [activities, addDownloadedFile]);
+  }, [activities, addDownloadedFile, hasAddedTestDownload]);
 
   const handleAddActivity = () => {
     startNewActivity();
@@ -60,6 +64,8 @@ const EditActivities = () => {
   };
 
   const handleDownloadReport = (activityId: string, activityName: string) => {
+    if (!activityId || !activityName) return;
+    
     const downloadItem = {
       fileName: `${activityName || "Activity"} Report.pdf`,
       fileType: "PDF Report",
