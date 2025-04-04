@@ -14,10 +14,11 @@ import autoTable from "jspdf-autotable";
 interface ActivityCardProps {
   activity: Activity;
   onEdit?: (id: string) => void;
+  onDownload?: (fileType: string) => void;
   onMoreActions?: () => React.ReactNode;
 }
 
-const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onMoreActions }) => {
+const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownload, onMoreActions }) => {
   const { t } = useLanguage();
   const { deleteActivity, generateShareCodeForActivity } = useNGO();
   const navigate = useNavigate();
@@ -287,6 +288,9 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onMoreAct
       }
       
       // Save PDF
+      if (onDownload) {
+        onDownload("PDF Report");
+      }
       doc.save(`${activity.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success(t("pdfExported"));
     } catch (error) {
