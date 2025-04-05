@@ -20,7 +20,7 @@ interface ActivityCardProps {
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownload, onMoreActions }) => {
   const { t } = useLanguage();
-  const { deleteActivity, generateShareCodeForActivity } = useNGO();
+  const { deleteActivity, generateShareCodeForActivity, addDownloadedFile } = useNGO();
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -59,7 +59,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
     toast.success(t("activityShared"));
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -146,128 +146,120 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         });
       }
       
-      // Add media and document previews on new pages if they exist
-      if (activity.media.length > 0 || activity.documents.some(d => d.preview)) {
-        // First add a new page for media files if they exist
-        if (activity.media.length > 0) {
-          doc.addPage();
-          
-          // Add header to new page
-          doc.setFillColor(46, 204, 113);
-          doc.rect(0, 0, pageWidth, 20, 'F');
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-          doc.text("Media Files", pageWidth / 2, 12, { align: 'center' });
-          
-          doc.setTextColor(44, 62, 80);
-          doc.setFontSize(14);
-          doc.text(`${t("media")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
-          
-          // Organize media in a grid layout
-          const mediaPerRow = 2;
-          const mediaWidth = pageWidth / mediaPerRow - 20;
-          const mediaHeight = mediaWidth * 0.75;
-          let mediaX = 15;
-          let mediaY = 40;
-          
-          activity.media.forEach((mediaUrl, index) => {
-            try {
-              // In a real app, we would handle image loading better
-              // but for now, we'll just indicate the media position
-              doc.setDrawColor(200, 200, 200);
-              doc.setFillColor(240, 240, 240);
-              doc.roundedRect(mediaX, mediaY, mediaWidth, mediaHeight, 3, 3, 'FD');
-              
-              doc.setFontSize(10);
-              doc.setTextColor(100, 100, 100);
-              doc.text(`${t("media")} #${index + 1}`, mediaX + mediaWidth/2, mediaY + mediaHeight/2, { align: 'center' });
-              
-              // Move to next position
-              if ((index + 1) % mediaPerRow === 0) {
-                mediaX = 15;
-                mediaY += mediaHeight + 15;
-                
-                // Add new page if needed
-                if (mediaY + mediaHeight > pageHeight - 20) {
-                  doc.addPage();
-                  // Add header to new page
-                  doc.setFillColor(46, 204, 113);
-                  doc.rect(0, 0, pageWidth, 20, 'F');
-                  doc.setTextColor(255, 255, 255);
-                  doc.setFontSize(16);
-                  doc.text("Media Files (Continued)", pageWidth / 2, 12, { align: 'center' });
-                  mediaY = 40;
-                }
-              } else {
-                mediaX += mediaWidth + 10;
-              }
-            } catch (error) {
-              console.error("Error adding media to PDF:", error);
-            }
-          });
-        }
+      // Handle media files
+      if (activity.media.length > 0) {
+        doc.addPage();
         
-        // Now add a new page for document previews if they exist
-        const docsWithPreview = activity.documents.filter(d => d.preview);
-        if (docsWithPreview.length > 0) {
-          doc.addPage();
-          
-          // Add header to new page
-          doc.setFillColor(46, 204, 113);
-          doc.rect(0, 0, pageWidth, 20, 'F');
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-          doc.text("Document Previews", pageWidth / 2, 12, { align: 'center' });
-          
-          doc.setTextColor(44, 62, 80);
-          doc.setFontSize(14);
-          doc.text(`${t("documents")} - ${activity.name}`, pageWidth / 2, 30, { align: 'center' });
-          
-          // Organize documents in a grid layout
-          const docsPerRow = 2;
-          const docWidth = pageWidth / docsPerRow - 20;
-          const docHeight = docWidth * 0.75;
-          let docX = 15;
-          let docY = 40;
-          
-          docsWithPreview.forEach((document, index) => {
-            try {
-              // In a real app, we would handle image loading better
-              doc.setDrawColor(200, 200, 200);
-              doc.setFillColor(240, 240, 240);
-              doc.roundedRect(docX, docY, docWidth, docHeight, 3, 3, 'FD');
+        // Add header
+        doc.setFillColor(46, 204, 113);
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text("Media Files", pageWidth / 2, 12, { align: 'center' });
+        
+        // Grid layout setup
+        const mediaPerRow = 1; // Changed to 1 per row for better quality
+        const mediaWidth = pageWidth - 40; // Larger size for better quality
+        const mediaHeight = mediaWidth * 0.75;
+        let mediaY = 40;
+        
+        // Process each media item
+        for (const mediaUrl of activity.media) {
+          try {
+            // Check if the mediaUrl is a base64 string
+            if (mediaUrl.startsWith('data:image')) {
+              // Add the image to the PDF
+              doc.addImage(
+                mediaUrl,
+                'JPEG',
+                20,
+                mediaY,
+                mediaWidth,
+                mediaHeight,
+                `image-${mediaY}`,
+                'MEDIUM' // quality setting
+              );
               
-              doc.setFontSize(10);
-              doc.setTextColor(100, 100, 100);
-              doc.text(document.fileName || `${t("document")} #${index + 1}`, docX + docWidth/2, docY + docHeight/2 - 10, { align: 'center' });
-              doc.text(document.type, docX + docWidth/2, docY + docHeight/2, { align: 'center' });
-              doc.text(document.comment || "", docX + docWidth/2, docY + docHeight/2 + 10, { align: 'center' });
+              mediaY += mediaHeight + 20;
               
-              // Move to next position
-              if ((index + 1) % docsPerRow === 0) {
-                docX = 15;
-                docY += docHeight + 15;
-                
-                // Add new page if needed
-                if (docY + docHeight > pageHeight - 20) {
-                  doc.addPage();
-                  // Add header to new page
-                  doc.setFillColor(46, 204, 113);
-                  doc.rect(0, 0, pageWidth, 20, 'F');
-                  doc.setTextColor(255, 255, 255);
-                  doc.setFontSize(16);
-                  doc.text("Document Previews (Continued)", pageWidth / 2, 12, { align: 'center' });
-                  docY = 40;
-                }
-              } else {
-                docX += docWidth + 10;
+              // Add new page if needed
+              if (mediaY + mediaHeight > pageHeight - 20) {
+                doc.addPage();
+                doc.setFillColor(46, 204, 113);
+                doc.rect(0, 0, pageWidth, 20, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(16);
+                doc.text("Media Files (Continued)", pageWidth / 2, 12, { align: 'center' });
+                mediaY = 40;
               }
-            } catch (error) {
-              console.error("Error adding document preview to PDF:", error);
             }
-          });
+          } catch (error) {
+            console.error("Error adding image to PDF:", error);
+            // Continue with next image if one fails
+          }
+        }
+      }
+
+      // Handle document previews
+      const docsWithPreview = activity.documents.filter(d => d.preview);
+      if (docsWithPreview.length > 0) {
+        doc.addPage();
+        
+        // Add header
+        doc.setFillColor(46, 204, 113);
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.text("Document Previews", pageWidth / 2, 12, { align: 'center' });
+        
+        let docY = 40;
+        const docWidth = pageWidth - 40;
+        const docHeight = docWidth * 0.75;
+        
+        for (const document of docsWithPreview) {
+          try {
+            if (document.preview?.startsWith('data:image')) {
+              // Add document preview
+              doc.addImage(
+                document.preview,
+                'JPEG',
+                20,
+                docY,
+                docWidth,
+                docHeight,
+                `doc-${docY}`,
+                'MEDIUM'
+              );
+              
+              // Add document info
+              docY += docHeight + 10;
+              doc.setFontSize(12);
+              doc.setTextColor(0, 0, 0);
+              doc.text(`${document.fileName} (${document.type})`, 20, docY);
+              if (document.comment) {
+                docY += 7;
+                doc.setFontSize(10);
+                doc.text(document.comment, 20, docY);
+              }
+              
+              docY += 20;
+              
+              // Add new page if needed
+              if (docY + docHeight > pageHeight - 20) {
+                doc.addPage();
+                doc.setFillColor(46, 204, 113);
+                doc.rect(0, 0, pageWidth, 20, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(16);
+                doc.text("Document Previews (Continued)", pageWidth / 2, 12, { align: 'center' });
+                docY = 40;
+              }
+            }
+          } catch (error) {
+            console.error("Error adding document preview to PDF:", error);
+            // Continue with next document if one fails
+          }
         }
       }
       
@@ -287,15 +279,27 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         doc.text(`${t("page")} ${i} ${t("of")} ${pageCount}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 10);
       }
       
-      // Save PDF
-      if (onDownload) {
-        onDownload("PDF Report");
-      }
-      doc.save(`${activity.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success(t("pdfExported"));
+      // Save the PDF
+      const fileName = `${activity.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+
+      // Add to downloaded files list - ONCE only
+      const downloadItem = {
+        id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+        fileName,
+        fileType: "PDF Report",
+        activityId: activity.id,
+        activityName: activity.name || "Activity Report",
+        downloadDate: new Date().toLocaleDateString(),
+      };
+      
+      // Add to downloaded files
+      addDownloadedFile(downloadItem);
+      toast.success(t("reportDownloaded"));
+      
     } catch (error) {
-      console.error("PDF Export Error:", error);
-      toast.error(t("pdfExportFailed"));
+      console.error("Error generating PDF:", error);
+      toast.error(t("errorGeneratingPDF"));
     }
   };
 
