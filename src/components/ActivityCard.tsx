@@ -65,30 +65,25 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      // Add app branding and styling
-      // Header with app name and theme color
-      doc.setFillColor(46, 204, 113); // NGO green color
+      doc.setFillColor(46, 204, 113);
       doc.rect(0, 0, pageWidth, 20, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text("NGO Activity Manager", pageWidth / 2, 12, { align: 'center' });
       
-      // Add title
       doc.setFontSize(20);
       doc.setTextColor(44, 62, 80);
       doc.setFont('helvetica', 'bold');
       const title = activity.name;
       doc.text(title, pageWidth / 2, 35, { align: 'center' });
       
-      // Add date and location
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 100, 100);
       doc.text(`${t("date")}: ${activity.date}`, 14, 45);
       doc.text(`${t("location")}: ${activity.location}`, 14, 52);
       
-      // Add description
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text(`${t("description")}:`, 14, 62);
@@ -96,11 +91,9 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
       const splitDescription = doc.splitTextToSize(activity.description, pageWidth - 28);
       doc.text(splitDescription, 14, 69);
       
-      // Add contact person
       let yPos = 69 + (splitDescription.length * 7);
       doc.text(`${t("personOfContact")}: ${activity.contactPerson.name} (${activity.contactPerson.contactNo})`, 14, yPos);
       
-      // Add beneficiaries table
       yPos += 15;
       doc.text(`${t("beneficiaries")} (${activity.beneficiaries.length})`, 14, yPos);
       yPos += 5;
@@ -126,7 +119,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         yPos = (doc as any).lastAutoTable.finalY + 10;
       }
       
-      // Add documents table
       doc.text(`${t("documents")} (${activity.documents.length})`, 14, yPos);
       yPos += 5;
       
@@ -263,8 +255,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         }
       }
       
-      // Add footer to all pages
-      // Fix: Use internal.pages.length instead of getNumberOfPages()
       const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -401,7 +391,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         )}
       </Card>
 
-      {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent>
           <DialogHeader>
@@ -424,7 +413,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
