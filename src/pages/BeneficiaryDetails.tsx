@@ -34,24 +34,24 @@ const BeneficiaryDetails = () => {
   const [docPhotos, setDocPhotos] = useState<Record<string, string | null>>({});
 
   const genderOptions = [
-    { value: "female", label: t("female") },
-    { value: "male", label: t("male") },
-    { value: "other", label: t("other") },
+    { value: "female", label: t("Female") },
+    { value: "male", label: t("Male") },
+    { value: "other", label: t("Other") },
   ];
 
   const casteOptions = [
-    { value: "general", label: t("general") },
-    { value: "obc", label: t("obc") },
-    { value: "scst", label: t("scst") },
-    { value: "ews", label: t("ews") },
-    { value: "other", label: t("other") },
+    { value: "general", label: t("General") },
+    { value: "obc", label: t("OBC") },
+    { value: "scst", label: t("SC/ST") },
+    { value: "ews", label: t("EWS") },
+    { value: "other", label: t("Other") },
   ];
 
   const documentTypeOptions = [
-    { value: "aadhar", label: t("aadhar") },
-    { value: "pan", label: t("pan") },
-    { value: "dl", label: t("dl") },
-    { value: "election", label: t("election") },
+    { value: "aadhar", label: t("Aadhar") },
+    { value: "pan", label: t("PAN") },
+    { value: "dl", label: t("Driving License") },
+    { value: "election", label: t("Election ID") },
   ];
 
   const handleAddBeneficiary = () => {
@@ -189,7 +189,7 @@ const BeneficiaryDetails = () => {
           
           <div className="space-y-6 mt-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-ngo-dark">{t("beneficiaryDetails")}</h2>
+              <h2 className="text-xl font-semibold text-ngo-dark">{t("Beneficiary Details")}</h2>
               <Button 
                 type="button" 
                 variant="outline" 
@@ -197,13 +197,13 @@ const BeneficiaryDetails = () => {
                 className="flex items-center"
               >
                 <UserPlus size={16} className="mr-2" />
-                {t("addBeneficiary")}
+                {t("Add Beneficiary")}
               </Button>
             </div>
             
             <div className="space-y-4">
               {tempActivity.beneficiaries.length === 0 ? (
-                <p className="text-center text-gray-500 py-4">{t("noBeneficiaries")}</p>
+                <p className="text-center text-gray-500 py-4">{t("No Beneficiaries")}</p>
               ) : (
                 <Accordion type="multiple" className="w-full">
                   {tempActivity.beneficiaries.map((ben: Beneficiary) => (
@@ -253,8 +253,8 @@ const BeneficiaryDetails = () => {
                           
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                              <Label>
-                                {t("firstName")} <span className="text-red-500">*</span>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("First Name")} <span className="text-red-500">*</span>
                               </Label>
                               <Input
                                 value={ben.firstName}
@@ -264,7 +264,9 @@ const BeneficiaryDetails = () => {
                               />
                             </div>
                             <div>
-                              <Label>{t("middleName")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Middle Name")}
+                              </Label>
                               <Input
                                 value={ben.middleName}
                                 onChange={(e) => updateBeneficiaryInTemp(ben.id, { middleName: e.target.value })}
@@ -272,7 +274,9 @@ const BeneficiaryDetails = () => {
                               />
                             </div>
                             <div>
-                              <Label>{t("lastName")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Last Name")}
+                              </Label>
                               <Input
                                 value={ben.lastName}
                                 onChange={(e) => updateBeneficiaryInTemp(ben.id, { lastName: e.target.value })}
@@ -283,7 +287,9 @@ const BeneficiaryDetails = () => {
                           
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                              <Label>{t("gender")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Gender")}
+                              </Label>
                               <Select
                                 value={ben.gender}
                                 onValueChange={(value) => 
@@ -305,7 +311,9 @@ const BeneficiaryDetails = () => {
                               </Select>
                             </div>
                             <div>
-                              <Label>{t("caste")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Caste")}
+                              </Label>
                               <Select
                                 value={ben.caste}
                                 onValueChange={(value) => 
@@ -327,7 +335,9 @@ const BeneficiaryDetails = () => {
                               </Select>
                             </div>
                             <div>
-                              <Label>{t("age")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Age")}
+                              </Label>
                               <Input
                                 type="number"
                                 value={ben.age}
@@ -339,7 +349,9 @@ const BeneficiaryDetails = () => {
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <Label>{t("contactNumber")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Contact Number")}
+                              </Label>
                               <Input
                                 value={ben.contactNo}
                                 onChange={(e) => updateBeneficiaryInTemp(ben.id, { contactNo: e.target.value })}
@@ -347,7 +359,9 @@ const BeneficiaryDetails = () => {
                               />
                             </div>
                             <div>
-                              <Label>{t("comment")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Comment")}
+                              </Label>
                               <Input
                                 value={ben.comment}
                                 onChange={(e) => updateBeneficiaryInTemp(ben.id, { comment: e.target.value })}
@@ -357,7 +371,9 @@ const BeneficiaryDetails = () => {
                           </div>
                           
                           <div>
-                            <Label>{t("address")}</Label>
+                            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                              {t("Address")}
+                            </Label>
                             <Textarea
                               value={ben.address}
                               onChange={(e) => updateBeneficiaryInTemp(ben.id, { address: e.target.value })}
@@ -367,7 +383,7 @@ const BeneficiaryDetails = () => {
                           
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                              <Label className="text-base font-medium">{t("documents")}</Label>
+                              <Label className="text-base font-medium">{t("Documents")}</Label>
                               <Button 
                                 type="button" 
                                 variant="outline" 
@@ -376,7 +392,7 @@ const BeneficiaryDetails = () => {
                                 className="flex items-center"
                               >
                                 <Plus size={14} className="mr-1" />
-                                {t("addDocument")}
+                                {t("Add Document")}
                               </Button>
                             </div>
                             
@@ -384,7 +400,9 @@ const BeneficiaryDetails = () => {
                               <CardContent className="p-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                   <div>
-                                    <Label>{t("documentType")}</Label>
+                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                      {t("Document Type")}
+                                    </Label>
                                     <Select
                                       value={ben.documentType}
                                       onValueChange={(value) => 
@@ -406,7 +424,9 @@ const BeneficiaryDetails = () => {
                                     </Select>
                                   </div>
                                   <div>
-                                    <Label>{t("documentNumber")}</Label>
+                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                      {t("Document Number")}
+                                    </Label>
                                     <Input
                                       value={ben.documentNo}
                                       onChange={(e) => updateBeneficiaryInTemp(ben.id, { documentNo: e.target.value })}
@@ -414,7 +434,9 @@ const BeneficiaryDetails = () => {
                                     />
                                   </div>
                                   <div>
-                                    <Label>{t("documentPhoto")}</Label>
+                                    <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                      {t("Document Photo")}
+                                    </Label>
                                     <input
                                       type="file"
                                       id={`doc-photo-main-${ben.id}`}
@@ -463,7 +485,9 @@ const BeneficiaryDetails = () => {
                                 <CardContent className="p-4">
                                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
-                                      <Label>{t("documentType")}</Label>
+                                      <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        {t("Document Type")}
+                                      </Label>
                                       <Select
                                         value={doc.type}
                                         onValueChange={(value) => updateDocument(ben.id, doc.id, { 
@@ -483,7 +507,9 @@ const BeneficiaryDetails = () => {
                                       </Select>
                                     </div>
                                     <div>
-                                      <Label>{t("documentNumber")}</Label>
+                                      <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        {t("Document Number")}
+                                      </Label>
                                       <Input
                                         value={doc.number}
                                         onChange={(e) => updateDocument(ben.id, doc.id, { number: e.target.value })}
@@ -491,7 +517,9 @@ const BeneficiaryDetails = () => {
                                       />
                                     </div>
                                     <div className="relative">
-                                      <Label>{t("documentPhoto")}</Label>
+                                      <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        {t("Document Photo")}
+                                      </Label>
                                       <div 
                                         className="border border-dashed border-gray-300 rounded-lg p-2 h-10 flex items-center justify-center cursor-pointer hover:border-ngo-green"
                                         onClick={() => {
@@ -549,7 +577,9 @@ const BeneficiaryDetails = () => {
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <Label>{t("referencePerson")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Reference Person")}
+                              </Label>
                               <Input
                                 value={ben.referenceName}
                                 onChange={(e) => updateBeneficiaryInTemp(ben.id, { referenceName: e.target.value })}
@@ -557,7 +587,9 @@ const BeneficiaryDetails = () => {
                               />
                             </div>
                             <div>
-                              <Label>{t("referenceContact")}</Label>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Reference Contact")}
+                              </Label>
                               <Input
                                 value={ben.referenceContact}
                                 onChange={(e) => updateBeneficiaryInTemp(ben.id, { referenceContact: e.target.value })}

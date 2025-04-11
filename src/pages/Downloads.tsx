@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
@@ -33,7 +32,7 @@ const Downloads: React.FC = () => {
       <main className="flex-1 p-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-ngo-dark mb-6 text-center">
-            {t("downloads")}
+            {t("Downloads")}
           </h1>
 
           {!Array.isArray(downloadedFiles) || downloadedFiles.length === 0 ? (
@@ -43,16 +42,16 @@ const Downloads: React.FC = () => {
                   <FileDown size={48} className="text-gray-400" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-2">
-                  {t("noDownloads")}
+                  {t("No Downloads")}
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  {t("noDownloadsDescription")}
+                  {t("No Downloads Description")}
                 </p>
                 <Button
                   onClick={() => navigate("/dashboard")}
                   className="bg-ngo-green text-ngo-dark hover:bg-ngo-green/90"
                 >
-                  {t("goToDashboard")}
+                  {t("Go To Dashboard")}
                 </Button>
               </CardContent>
             </Card>
@@ -76,15 +75,15 @@ const Downloads: React.FC = () => {
                   <CardContent className="pb-2">
                     <div className="text-sm text-gray-600">
                       <p>
-                        <span className="font-medium">{t("activity")}: </span>
+                        <span className="font-medium">{t("Activity")}: </span>
                         {file.activityName}
                       </p>
                       <p>
-                        <span className="font-medium">{t("fileType")}: </span>
+                        <span className="font-medium">{t("File Type")}: </span>
                         {file.fileType}
                       </p>
                       <p>
-                        <span className="font-medium">{t("downloadDate")}: </span>
+                        <span className="font-medium">{t("Download Date")}: </span>
                         {file.downloadDate}
                       </p>
                     </div>
@@ -96,7 +95,7 @@ const Downloads: React.FC = () => {
                       className="w-full text-ngo-dark border-ngo-green hover:bg-ngo-green/10"
                     >
                       <FileDown size={16} className="mr-2" />
-                      {t("download")}
+                      {t("Download")}
                     </Button>
                   </CardFooter>
                 </Card>
