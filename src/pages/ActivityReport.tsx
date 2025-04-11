@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useLanguage } from "@/context/LanguageContext";
@@ -26,6 +27,8 @@ const ActivityReport = () => {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaPreview, setMediaPreview] = useState<string[]>(tempActivity.media || []);
+  const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
 
   const handleDateChange = (date: Date | undefined) => {
     setDate(date);
@@ -266,25 +269,43 @@ const ActivityReport = () => {
               {/* Media Previews */}
               {mediaPreview.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
-                  {mediaPreview.map((media, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={media}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-md"
-                      />
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeMedia(index);
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                  {mediaPreview.map((media, index) => {
+                    const isVideo = media.startsWith('data:video');
+                    return (
+                      <div key={index} className="relative group">
+                        {isVideo ? (
+                          <video
+                            src={media}
+                            className="w-full h-24 object-cover rounded-md cursor-pointer"
+                            onClick={() => {
+                              setSelectedMedia(media);
+                              setMediaType("video");
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src={media}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-md cursor-pointer"
+                            onClick={() => {
+                              setSelectedMedia(media);
+                              setMediaType("image");
+                            }}
+                          />
+                        )}
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeMedia(index);
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -309,6 +330,28 @@ const ActivityReport = () => {
           </div>
         </div>
       </main>
+
+      {/* Media Preview Dialog */}
+      <Dialog open={!!selectedMedia} onOpenChange={() => {
+        setSelectedMedia(null);
+        setMediaType(null);
+      }}>
+        <DialogContent className="max-w-4xl">
+          {selectedMedia && mediaType === "video" ? (
+            <video
+              src={selectedMedia}
+              controls
+              className="w-full h-auto max-h-[80vh]"
+            />
+          ) : selectedMedia && (
+            <img
+              src={selectedMedia}
+              alt="Media Preview"
+              className="w-full h-auto max-h-[80vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
