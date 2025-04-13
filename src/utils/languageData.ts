@@ -28,6 +28,19 @@ export const translations: Translations = {
     profile: "Profile",
     dashboard: "Dashboard",
     add: "Add",
+    activitiesLabel: "Activities",
+
+    // Gender
+    Female: "Female",
+    Male: "Male",
+    OtherGender: "Other",
+
+    // Document Types
+    Bill: "Bill",
+    Receipt: "Receipt",
+    Invoice: "Invoice",
+    CashVoucher: "Cash Voucher",
+    OtherDocument: "Other",
     
     // Login Screen
     loginWithGoogle: "Login with Google",
@@ -84,6 +97,17 @@ export const translations: Translations = {
     support: "Support",
     aboutUs: "About Us",
     changeLanguage: "Change Language",
+    noDataAvailable: "No data available",
+    
+    // Analytics Dashboard
+    totalActivities: "Total Activities",
+    totalBeneficiaries: "Total Beneficiaries",
+    totalDocuments: "Total Documents",
+    uniqueLocations: "Unique Locations",
+    activitiesByMonth: "Activities by Month",
+    beneficiariesByGender: "Beneficiaries by Gender",
+    beneficiariesByAge: "Beneficiaries by Age",
+    documentsByType: "Documents by Type",
     
     // Activity Report
     activityName: "Activity Name",
@@ -140,7 +164,6 @@ export const translations: Translations = {
     referenceContact: "Reference Contact",
     
     // Edit Activities
-    activities: "Activities",
     noActivities: "No activities found",
     beneficiaries: "Beneficiaries",
     enterCode: "Enter Code",
@@ -338,7 +361,6 @@ export const translations: Translations = {
     codeTime: "Code Time Successfully",
     codeEternity: "Code Eternity Successfully",
     codeInfinity: "Code Infinity Successfully",
-    codeZero: "Code Zero Successfully",
     codeOne: "Code One Successfully",
     codeTwo: "Code Two Successfully",
     codeThree: "Code Three Successfully",
@@ -469,7 +491,7 @@ export const translations: Translations = {
   },
   hi: {
     // Common
-    appName: "एनजीओसाथी",
+    appName: "NGOSaathi",
     save: "सहेजें",
     cancel: "रद्द करें",
     back: "वापस",
@@ -483,10 +505,23 @@ export const translations: Translations = {
     share: "साझा करें",
     import: "आयात करें",
     welcome: "स्वागत है",
-    logout: "लॉगआउट",
+    logout: "लॉग आउट",
     profile: "प्रोफ़ाइल",
     dashboard: "डैशबोर्ड",
     add: "जोड़ें",
+    activitiesLabel: "गतिविधियां",
+
+    // Gender
+    Female: "महिला",
+    Male: "पुरुष",
+    OtherGender: "अन्य",
+
+    // Document Types
+    Bill: "बिल",
+    Receipt: "रसीद",
+    Invoice: "चालान",
+    CashVoucher: "नकद वाउचर",
+    OtherDocument: "अन्य",
     
     // Login Screen
     loginWithGoogle: "Google से लॉगिन करें",
@@ -543,6 +578,17 @@ export const translations: Translations = {
     support: "समर्थन",
     aboutUs: "हमारे बारे में",
     changeLanguage: "भाषा बदलें",
+    noDataAvailable: "कोई डेटा उपलब्ध नहीं है",
+    
+    // Analytics Dashboard
+    totalActivities: "कुल गतिविधियां",
+    totalBeneficiaries: "कुल लाभार्थी",
+    totalDocuments: "कुल दस्तावेज़",
+    uniqueLocations: "विशिष्ट स्थान",
+    activitiesByMonth: "महीने के अनुसार गतिविधियां",
+    beneficiariesByGender: "लिंग के अनुसार लाभार्थी",
+    beneficiariesByAge: "उम्र के अनुसार लाभार्थी",
+    documentsByType: "प्रकार के अनुसार दस्तावेज़",
     
     // Activity Report
     activityName: "गतिविधि का नाम",
@@ -599,7 +645,6 @@ export const translations: Translations = {
     referenceContact: "संदर्भ संपर्क",
     
     // Edit Activities
-    activities: "गतिविधियां",
     noActivities: "कोई गतिविधि नहीं मिली",
     beneficiaries: "लाभार्थी",
     enterCode: "कोड दर्ज करें",
@@ -638,10 +683,10 @@ export const translations: Translations = {
   },
   gu: {
     // Common
-    appName: "એનજીઓસાથી",
+    appName: "NGOSaathi",
     save: "સાચવો",
     cancel: "રદ કરો",
-    back: "પાછા",
+    back: "પાછળ",
     next: "આગળ",
     skip: "છોડો",
     submit: "સબમિટ કરો",
@@ -652,13 +697,26 @@ export const translations: Translations = {
     share: "શેર કરો",
     import: "આયાત કરો",
     welcome: "સ્વાગત છે",
-    logout: "લોગઆઉટ",
+    logout: "લૉગ આઉટ",
     profile: "પ્રોફાઇલ",
     dashboard: "ડેશબોર્ડ",
     add: "ઉમેરો",
+    activitiesLabel: "ગતિવિધિઓ",
+
+    // Gender
+    Female: "સ્ત્રી",
+    Male: "પુરુષ",
+    OtherGender: "અન્ય",
+
+    // Document Types
+    Bill: "બિલ",
+    Receipt: "રસીદ",
+    Invoice: "ઇનવોઇસ",
+    CashVoucher: "રોકડ વાઉચર",
+    OtherDocument: "અન્ય",
     
     // Login Screen
-    loginWithGoogle: "Google સાથે લોગિન કરો",
+    loginWithGoogle: "Google સાથે લૉગિન કરો",
     signUpText: "તમારી NGO પ્રવૃત્તિઓનું સંચાલન કરવા માટે સાઇન અપ કરો",
     
     // Setup NGO Screen
@@ -707,11 +765,22 @@ export const translations: Translations = {
     viewAllActivities: "બધી પ્રવૃત્તિઓ જુઓ",
     
     // Menu Items
-    analytics: "એનાલિટિક્સ",
-    downloads: "ડાઉનલોડ્સ",
-    support: "સપોર્ટ",
+    analytics: "વિશ્લેષણ",
+    downloads: "ડાઉનલોડ",
+    support: "સહાય",
     aboutUs: "અમારા વિશે",
     changeLanguage: "ભાષા બદલો",
+    noDataAvailable: "કોઈ ડેટા ઉપલબ્ધ નથી",
+    
+    // Analytics Dashboard
+    totalActivities: "કુલ ગતિવિધિઓ",
+    totalBeneficiaries: "કુલ લાભાર્થીઓ",
+    totalDocuments: "કુલ દસ્તાવેજો",
+    uniqueLocations: "વિશિષ્ટ સ્થાનો",
+    activitiesByMonth: "મહેવારોની આધારે ગતિવિધિઓ",
+    beneficiariesByGender: "લિંગની આધારે લાભાર્થીઓ",
+    beneficiariesByAge: "ઉમરની આધારે લાભાર્થીઓ",
+    documentsByType: "પ્રકારની આધારે દસ્તાવેજો",
     
     // Activity Report
     activityName: "પ્રવૃત્તિનું નામ",
@@ -768,7 +837,6 @@ export const translations: Translations = {
     referenceContact: "સંદર્ભ સંપર્ક",
     
     // Edit Activities
-    activities: "પ્રવૃત્તિઓ",
     noActivities: "કોઈ પ્રવૃત્તિઓ મળી નથી",
     beneficiaries: "લાભાર્થીઓ",
     enterCode: "કોડ દાખલ કરો",
