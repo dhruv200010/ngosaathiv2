@@ -360,14 +360,25 @@ const BeneficiaryDetails = () => {
                             </div>
                             <div>
                               <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                {t("Comment")}
+                                {t("Alternate No.")}
                               </Label>
                               <Input
-                                value={ben.comment}
-                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { comment: e.target.value })}
-                                placeholder={t("comment")}
+                                value={ben.alternateNo}
+                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { alternateNo: e.target.value })}
+                                placeholder={t("alternateNo")}
                               />
                             </div>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                              {t("Comment")}
+                            </Label>
+                            <Input
+                              value={ben.comment}
+                              onChange={(e) => updateBeneficiaryInTemp(ben.id, { comment: e.target.value })}
+                              placeholder={t("comment")}
+                            />
                           </div>
                           
                           <div>

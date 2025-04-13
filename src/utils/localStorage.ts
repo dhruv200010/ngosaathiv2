@@ -1,4 +1,3 @@
-
 import { Activity, Beneficiary, Document, NGOProfile } from "@/context/NGOContext";
 
 const STORAGE_PREFIX = "ngo_saathi_";
@@ -93,6 +92,7 @@ export const getDefaultBeneficiary = (): Beneficiary => {
     age: "",
     comment: "",
     contactNo: "",
+    alternateNo: "",
     address: "",
     documentType: "aadhar",
     documentNo: "",

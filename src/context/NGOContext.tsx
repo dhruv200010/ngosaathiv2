@@ -49,6 +49,7 @@ export interface Beneficiary {
   age: string;
   comment: string;
   contactNo: string;
+  alternateNo: string;
   address: string;
   documentType: "aadhar" | "pan" | "dl" | "election";
   documentNo: string;
