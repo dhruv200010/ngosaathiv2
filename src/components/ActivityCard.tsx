@@ -10,6 +10,7 @@ import { toast } from "@/lib/toast";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { format } from "date-fns";
 
 interface ActivityCardProps {
   activity: Activity;
@@ -270,7 +271,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
       }
       
       // Save the PDF
-      const fileName = `${activity.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `${activity.name} ${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
 
       // Add to downloaded files list - ONCE only
@@ -341,7 +342,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         <CardContent>
           <div className="text-sm text-gray-700 mb-2">
             <div className="flex justify-between">
-              <span>{activity.date}</span>
+              <span>{format(new Date(activity.date), "PPP 'at' p")}</span>
               <span>
                 {activity.beneficiaries.length} {t("beneficiaries")}
               </span>

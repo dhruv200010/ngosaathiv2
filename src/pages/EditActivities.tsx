@@ -125,7 +125,7 @@ const EditActivities = () => {
                   onEdit={() => handleEditActivity(activity.id)}
                   onDownload={(fileType) => handleDownload(
                     activity, 
-                    `${activity.name}_Report.pdf`, 
+                    `${activity.name} Report.pdf`, 
                     fileType || "PDF Report"
                   )}
                 />
