@@ -392,6 +392,39 @@ const BeneficiaryDetails = () => {
                             />
                           </div>
                           
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("State")}
+                              </Label>
+                              <Input
+                                value={ben.state}
+                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { state: e.target.value })}
+                                placeholder={t("state")}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("District")}
+                              </Label>
+                              <Input
+                                value={ben.district}
+                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { district: e.target.value })}
+                                placeholder={t("district")}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {t("Tehsil")}
+                              </Label>
+                              <Input
+                                value={ben.tehsil}
+                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { tehsil: e.target.value })}
+                                placeholder={t("tehsil")}
+                              />
+                            </div>
+                          </div>
+                          
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
                               <Label className="text-base font-medium">{t("Documents")}</Label>

@@ -166,6 +166,9 @@ export const translations: Translations = {
     election: "Voter ID",
     referencePerson: "Reference Person",
     referenceContact: "Reference Contact",
+    state: "State",
+    district: "District",
+    tehsil: "Tehsil",
     
     // Edit Activities
     noActivities: "No Activities Found",
@@ -651,6 +654,9 @@ export const translations: Translations = {
     election: "वोटर आईडी",
     referencePerson: "संदर्भ व्यक्ति",
     referenceContact: "संदर्भ संपर्क",
+    state: "राज्य",
+    district: "जिला",
+    tehsil: "तहसील",
     
     // Edit Activities
     noActivities: "कोई गतिविधि नहीं मिली",
@@ -847,6 +853,9 @@ export const translations: Translations = {
     election: "મતદાર ID",
     referencePerson: "સંદર્ભ વ્યક્તિ",
     referenceContact: "સંદર્ભ સંપર્ક",
+    state: "રાજ્ય",
+    district: "જિલ્લો",
+    tehsil: "તાલુકો",
     
     // Edit Activities
     noActivities: "કોઈ પ્રવૃત્તિઓ મળી નથી",

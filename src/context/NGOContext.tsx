@@ -51,6 +51,9 @@ export interface Beneficiary {
   contactNo: string;
   alternateNo: string;
   address: string;
+  state: string;
+  district: string;
+  tehsil: string;
   documentType: "aadhar" | "pan" | "dl" | "election";
   documentNo: string;
   referenceName: string;
