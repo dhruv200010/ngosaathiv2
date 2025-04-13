@@ -47,12 +47,12 @@ export const translations: Translations = {
     signUpText: "Sign up to start managing your NGO activities",
     
     // Setup NGO Screen
-    setupNGO: "Set up your NGO",
+    setupNGO: "Set Up Your NGO",
     ngoName: "NGO Name",
     uploadPhoto: "Upload Photo",
     
     // NGO Details Screen
-    setupDetails: "Setup",
+    setupDetails: "Setup Details",
     registrationNo: "Registration No.",
     registrationDate: "Registration Date",
     workingAreas: "Working Areas",
@@ -89,6 +89,9 @@ export const translations: Translations = {
     manageActivities: "Manage your activities",
     importActivity: "Import Activity",
     importFromOtherUser: "Import from other user",
+    recentActivities: "Recent Activities",
+    noRecentActivities: "No recent activities",
+    addYourFirstActivity: "Add your first activity",
     viewAllActivities: "View All Activities",
     
     // Menu Items
@@ -164,8 +167,8 @@ export const translations: Translations = {
     referenceContact: "Reference Contact",
     
     // Edit Activities
-    noActivities: "No activities found",
-    beneficiaries: "Beneficiaries",
+    noActivities: "No Activities Found",
+    activities: "Activities",
     enterCode: "Enter Code",
     activityShared: "Activity shared successfully",
     activityImported: "Activity imported successfully",
@@ -545,7 +548,7 @@ export const translations: Translations = {
     child: "चाइल्ड",
     
     // Working Areas
-    noPoverty: "कोई गरीबी नहीं",
+    noPoverty: "कोई गरीबી नहीं",
     zeroHunger: "शून्य भूख",
     goodHealth: "अच्छा स्वास्थ्य और कल्याण",
     qualityEducation: "गुणवत्तापूर्ण शिक्षा",
@@ -570,6 +573,9 @@ export const translations: Translations = {
     manageActivities: "अपनी गतिविधियों का प्रबंधन करें",
     importActivity: "गतिविधि आयात करें",
     importFromOtherUser: "अन्य उपयोगकर्ता से आयात करें",
+    recentActivities: "हाल की गतिविधियां",
+    noRecentActivities: "कोई हाल की गतिविधि नहीं",
+    addYourFirstActivity: "अपनी पहली गतिविधि जोड़ें",
     viewAllActivities: "सभी गतिविधियां देखें",
     
     // Menu Items
@@ -646,7 +652,7 @@ export const translations: Translations = {
     
     // Edit Activities
     noActivities: "कोई गतिविधि नहीं मिली",
-    beneficiaries: "लाभार्थी",
+    activities: "गतिविधियां",
     enterCode: "कोड दर्ज करें",
     activityShared: "गतिविधि सफलतापूर्वक साझा की गई",
     activityImported: "गतिविधि सफलतापूर्वक आयात की गई",
@@ -762,6 +768,9 @@ export const translations: Translations = {
     manageActivities: "તમારી પ્રવૃત્તિઓનું સંચાલન કરો",
     importActivity: "પ્રવૃત્તિ આયાત કરો",
     importFromOtherUser: "અન્ય વપરાશકર્તા પાસેથી આયાત કરો",
+    recentActivities: "તાજેતરની પ્રવૃત્તિઓ",
+    noRecentActivities: "કોઈ તાજેતરની પ્રવૃત્તિ નથી",
+    addYourFirstActivity: "તમારી પ્રથમ પ્રવૃત્તિ ઉમેરો",
     viewAllActivities: "બધી પ્રવૃત્તિઓ જુઓ",
     
     // Menu Items
@@ -838,7 +847,7 @@ export const translations: Translations = {
     
     // Edit Activities
     noActivities: "કોઈ પ્રવૃત્તિઓ મળી નથી",
-    beneficiaries: "લાભાર્થીઓ",
+    activities: "ગતિવિધિઓ",
     enterCode: "કોડ દાખલ કરો",
     activityShared: "પ્રવૃત્તિ સફળતાપૂર્વક શેર કરી",
     activityImported: "પ્રવૃત્તિ સફળતાપૂર્વક આયાત કરી",
