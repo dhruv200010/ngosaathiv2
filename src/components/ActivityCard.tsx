@@ -152,32 +152,117 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
         doc.text("Media Files", pageWidth / 2, 12, { align: 'center' });
         
         // Grid layout setup
-        const mediaPerRow = 1; // Changed to 1 per row for better quality
-        const mediaWidth = pageWidth - 40; // Larger size for better quality
+        const mediaPerRow = 2;
+        const mediaPerColumn = 3;
+        const mediaWidth = (pageWidth - 60) / mediaPerRow;
         const mediaHeight = mediaWidth * 0.75;
         let mediaY = 40;
+        let mediaX = 20;
+        let currentRow = 0;
+        let currentColumn = 0;
         
         // Process each media item
         for (const mediaUrl of activity.media) {
           try {
-            // Check if the mediaUrl is a base64 string
-            if (mediaUrl.startsWith('data:image')) {
+            if (mediaUrl.startsWith('data:video')) {
+              // Create a video element to capture snapshot
+              const video = document.createElement('video');
+              video.src = mediaUrl;
+              
+              // Wait for video to be loaded
+              await new Promise((resolve) => {
+                video.onloadeddata = resolve;
+                video.load();
+              });
+              
+              // Set video to first frame
+              video.currentTime = 0;
+              
+              // Wait for seek to complete
+              await new Promise((resolve) => {
+                video.onseeked = resolve;
+              });
+              
+              // Create canvas to capture frame
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              // Convert canvas to base64 image
+              const snapshot = canvas.toDataURL('image/jpeg', 0.8);
+              
+              // Calculate position for current image
+              const xPos = mediaX + (currentColumn * (mediaWidth + 20));
+              const yPos = mediaY + (currentRow * (mediaHeight + 20));
+              
+              // Add the snapshot to the PDF
+              doc.addImage(
+                snapshot,
+                'JPEG',
+                xPos,
+                yPos,
+                mediaWidth,
+                mediaHeight,
+                `video-${currentRow}-${currentColumn}`,
+                'MEDIUM'
+              );
+              
+              // Add video indicator with improved style
+              doc.setFontSize(10);
+              doc.setTextColor(255, 255, 255);
+              doc.setFillColor(0, 0, 0, 0.7);
+              const indicatorWidth = 30;
+              const indicatorHeight = 12;
+              const indicatorX = xPos + mediaWidth - indicatorWidth - 5;
+              const indicatorY = yPos + mediaHeight - indicatorHeight - 5;
+              
+              // Draw semi-transparent background
+              doc.roundedRect(
+                indicatorX,
+                indicatorY,
+                indicatorWidth,
+                indicatorHeight,
+                2,
+                2,
+                'F'
+              );
+              
+              // Add video text with centered alignment
+              doc.setFont('helvetica', 'bold');
+              const textWidth = doc.getTextWidth('VIDEO');
+              const textX = indicatorX + (indicatorWidth - textWidth) / 2;
+              const textY = indicatorY + (indicatorHeight + 2) / 2;
+              doc.text('VIDEO', textX, textY);
+              
+            } else if (mediaUrl.startsWith('data:image')) {
+              // Calculate position for current image
+              const xPos = mediaX + (currentColumn * (mediaWidth + 20));
+              const yPos = mediaY + (currentRow * (mediaHeight + 20));
+              
               // Add the image to the PDF
               doc.addImage(
                 mediaUrl,
                 'JPEG',
-                20,
-                mediaY,
+                xPos,
+                yPos,
                 mediaWidth,
                 mediaHeight,
-                `image-${mediaY}`,
-                'MEDIUM' // quality setting
+                `image-${currentRow}-${currentColumn}`,
+                'MEDIUM'
               );
+            }
+            
+            // Update grid position
+            currentColumn++;
+            if (currentColumn >= mediaPerRow) {
+              currentColumn = 0;
+              currentRow++;
               
-              mediaY += mediaHeight + 20;
-              
-              // Add new page if needed
-              if (mediaY + mediaHeight > pageHeight - 20) {
+              // Check if we need a new page
+              if (currentRow >= mediaPerColumn) {
+                currentRow = 0;
                 doc.addPage();
                 doc.setFillColor(46, 204, 113);
                 doc.rect(0, 0, pageWidth, 20, 'F');
@@ -188,8 +273,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
               }
             }
           } catch (error) {
-            console.error("Error adding image to PDF:", error);
-            // Continue with next image if one fails
+            console.error("Error adding media to PDF:", error);
+            // Continue with next media if one fails
           }
         }
       }
