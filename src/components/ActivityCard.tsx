@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, FileDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, Eye, FileText, FileImage, FileVideo, File, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -8,8 +8,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useNGO, Activity } from "@/context/NGOContext";
 import { toast } from "@/lib/toast";
 import { useNavigate } from "react-router-dom";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 
 interface ActivityCardProps {
@@ -21,12 +19,14 @@ interface ActivityCardProps {
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownload, onMoreActions }) => {
   const { t } = useLanguage();
-  const { deleteActivity, generateShareCodeForActivity, addDownloadedFile } = useNGO();
+  const { deleteActivity, generateShareCodeForActivity } = useNGO();
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
   const [shareCode, setShareCode] = useState<string>("");
+  const [videoSnapshots, setVideoSnapshots] = useState<{ [key: string]: string }>({});
 
   const toggleDetails = () => {
     setShowDetails(!showDetails);
@@ -60,324 +60,42 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
     toast.success(t("activityShared"));
   };
 
-  const exportToPDF = async () => {
+  const captureVideoSnapshot = async (videoUrl: string, index: number) => {
     try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
+      const video = document.createElement('video');
+      video.src = videoUrl;
       
-      doc.setFillColor(46, 204, 113);
-      doc.rect(0, 0, pageWidth, 20, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text("NGO Activity Manager", pageWidth / 2, 12, { align: 'center' });
-      
-      doc.setFontSize(20);
-      doc.setTextColor(44, 62, 80);
-      doc.setFont('helvetica', 'bold');
-      const title = activity.name;
-      doc.text(title, pageWidth / 2, 35, { align: 'center' });
-      
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 100, 100);
-      doc.text(`${t("date")}: ${activity.date}`, 14, 45);
-      doc.text(`${t("location")}: ${activity.location}`, 14, 52);
-      
-      doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
-      doc.text(`${t("description")}:`, 14, 62);
-      
-      const splitDescription = doc.splitTextToSize(activity.description, pageWidth - 28);
-      doc.text(splitDescription, 14, 69);
-      
-      let yPos = 69 + (splitDescription.length * 7);
-      doc.text(`${t("personOfContact")}: ${activity.contactPerson.name} (${activity.contactPerson.contactNo})`, 14, yPos);
-      
-      yPos += 15;
-      doc.text(`${t("beneficiaries")} (${activity.beneficiaries.length})`, 14, yPos);
-      yPos += 5;
-      
-      if (activity.beneficiaries.length > 0) {
-        const beneficiaryData = activity.beneficiaries.map(b => [
-          `${b.firstName} ${b.middleName} ${b.lastName}`.trim(),
-          b.gender,
-          b.age,
-          b.contactNo,
-          b.documentType,
-          b.documentNo
-        ]);
-        
-        autoTable(doc, {
-          startY: yPos,
-          head: [[t("name"), t("gender"), t("age"), t("contactNo"), t("docType"), t("docNo")]],
-          body: beneficiaryData,
-          theme: 'grid',
-          headStyles: { fillColor: [46, 204, 113], textColor: [255, 255, 255] }
-        });
-        
-        yPos = (doc as any).lastAutoTable.finalY + 10;
-      }
-      
-      doc.text(`${t("documents")} (${activity.documents.length})`, 14, yPos);
-      yPos += 5;
-      
-      if (activity.documents.length > 0) {
-        const documentData = activity.documents.map(d => [
-          d.fileName || t("noFileName"),
-          d.type,
-          d.comment
-        ]);
-        
-        autoTable(doc, {
-          startY: yPos,
-          head: [[t("fileName"), t("docType"), t("comment")]],
-          body: documentData,
-          theme: 'grid',
-          headStyles: { fillColor: [52, 152, 219], textColor: [255, 255, 255] }
-        });
-      }
-      
-      // Handle media files
-      if (activity.media.length > 0) {
-        doc.addPage();
-        
-        // Add header
-        doc.setFillColor(46, 204, 113);
-        doc.rect(0, 0, pageWidth, 20, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text("Media Files", pageWidth / 2, 12, { align: 'center' });
-        
-        // Grid layout setup
-        const mediaPerRow = 2;
-        const mediaPerColumn = 3;
-        const mediaWidth = (pageWidth - 60) / mediaPerRow;
-        const mediaHeight = mediaWidth * 0.75;
-        let mediaY = 40;
-        let mediaX = 20;
-        let currentRow = 0;
-        let currentColumn = 0;
-        
-        // Process each media item
-        for (const mediaUrl of activity.media) {
-          try {
-            if (mediaUrl.startsWith('data:video')) {
-              // Create a video element to capture snapshot
-              const video = document.createElement('video');
-              video.src = mediaUrl;
-              
-              // Wait for video to be loaded
-              await new Promise((resolve) => {
-                video.onloadeddata = resolve;
-                video.load();
-              });
-              
-              // Set video to first frame
-              video.currentTime = 0;
-              
-              // Wait for seek to complete
-              await new Promise((resolve) => {
-                video.onseeked = resolve;
-              });
-              
-              // Create canvas to capture frame
-              const canvas = document.createElement('canvas');
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              const ctx = canvas.getContext('2d');
-              ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-              
-              // Convert canvas to base64 image
-              const snapshot = canvas.toDataURL('image/jpeg', 0.8);
-              
-              // Calculate position for current image
-              const xPos = mediaX + (currentColumn * (mediaWidth + 20));
-              const yPos = mediaY + (currentRow * (mediaHeight + 20));
-              
-              // Add the snapshot to the PDF
-              doc.addImage(
-                snapshot,
-                'JPEG',
-                xPos,
-                yPos,
-                mediaWidth,
-                mediaHeight,
-                `video-${currentRow}-${currentColumn}`,
-                'MEDIUM'
-              );
-              
-              // Add video indicator with improved style
-              doc.setFontSize(10);
-              doc.setTextColor(255, 255, 255);
-              doc.setFillColor(0, 0, 0, 0.7);
-              const indicatorWidth = 30;
-              const indicatorHeight = 12;
-              const indicatorX = xPos + mediaWidth - indicatorWidth - 5;
-              const indicatorY = yPos + mediaHeight - indicatorHeight - 5;
-              
-              // Draw semi-transparent background
-              doc.roundedRect(
-                indicatorX,
-                indicatorY,
-                indicatorWidth,
-                indicatorHeight,
-                2,
-                2,
-                'F'
-              );
-              
-              // Add video text with centered alignment
-              doc.setFont('helvetica', 'bold');
-              const textWidth = doc.getTextWidth('VIDEO');
-              const textX = indicatorX + (indicatorWidth - textWidth) / 2;
-              const textY = indicatorY + (indicatorHeight + 2) / 2;
-              doc.text('VIDEO', textX, textY);
-              
-            } else if (mediaUrl.startsWith('data:image')) {
-              // Calculate position for current image
-              const xPos = mediaX + (currentColumn * (mediaWidth + 20));
-              const yPos = mediaY + (currentRow * (mediaHeight + 20));
-              
-              // Add the image to the PDF
-              doc.addImage(
-                mediaUrl,
-                'JPEG',
-                xPos,
-                yPos,
-                mediaWidth,
-                mediaHeight,
-                `image-${currentRow}-${currentColumn}`,
-                'MEDIUM'
-              );
-            }
-            
-            // Update grid position
-            currentColumn++;
-            if (currentColumn >= mediaPerRow) {
-              currentColumn = 0;
-              currentRow++;
-              
-              // Check if we need a new page
-              if (currentRow >= mediaPerColumn) {
-                currentRow = 0;
-                doc.addPage();
-                doc.setFillColor(46, 204, 113);
-                doc.rect(0, 0, pageWidth, 20, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
-                doc.text("Media Files (Continued)", pageWidth / 2, 12, { align: 'center' });
-                mediaY = 40;
-              }
-            }
-          } catch (error) {
-            console.error("Error adding media to PDF:", error);
-            // Continue with next media if one fails
-          }
-        }
-      }
+      await new Promise((resolve) => {
+        video.onloadeddata = resolve;
+        video.load();
+      });
 
-      // Handle document previews
-      const docsWithPreview = activity.documents.filter(d => d.preview);
-      if (docsWithPreview.length > 0) {
-        doc.addPage();
-        
-        // Add header
-        doc.setFillColor(46, 204, 113);
-        doc.rect(0, 0, pageWidth, 20, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text("Document Previews", pageWidth / 2, 12, { align: 'center' });
-        
-        let docY = 40;
-        const docWidth = pageWidth - 40;
-        const docHeight = docWidth * 0.75;
-        
-        for (const document of docsWithPreview) {
-          try {
-            if (document.preview?.startsWith('data:image')) {
-              // Add document preview
-              doc.addImage(
-                document.preview,
-                'JPEG',
-                20,
-                docY,
-                docWidth,
-                docHeight,
-                `doc-${docY}`,
-                'MEDIUM'
-              );
-              
-              // Add document info
-              docY += docHeight + 10;
-              doc.setFontSize(12);
-              doc.setTextColor(0, 0, 0);
-              doc.text(`${document.fileName} (${document.type})`, 20, docY);
-              if (document.comment) {
-                docY += 7;
-                doc.setFontSize(10);
-                doc.text(document.comment, 20, docY);
-              }
-              
-              docY += 20;
-              
-              // Add new page if needed
-              if (docY + docHeight > pageHeight - 20) {
-                doc.addPage();
-                doc.setFillColor(46, 204, 113);
-                doc.rect(0, 0, pageWidth, 20, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
-                doc.text("Document Previews (Continued)", pageWidth / 2, 12, { align: 'center' });
-                docY = 40;
-              }
-            }
-          } catch (error) {
-            console.error("Error adding document preview to PDF:", error);
-            // Continue with next document if one fails
-          }
-        }
-      }
+      video.currentTime = 1; // Capture at 1 second to avoid black frames
       
-      const pageCount = doc.internal.pages.length - 1;
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setTextColor(150, 150, 150);
-        doc.text(
-          `${t("generatedBy")}: NGO Activity Manager - ${new Date().toLocaleDateString()}`,
-          pageWidth / 2,
-          doc.internal.pageSize.getHeight() - 10,
-          { align: 'center' }
-        );
-        doc.text(`${t("page")} ${i} ${t("of")} ${pageCount}`, pageWidth - 20, doc.internal.pageSize.getHeight() - 10);
-      }
-      
-      // Save the PDF
-      const fileName = `${activity.name} ${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(fileName);
+      await new Promise((resolve) => {
+        video.onseeked = resolve;
+      });
 
-      // Add to downloaded files list - ONCE only
-      const downloadItem = {
-        id: Date.now().toString(36) + Math.random().toString(36).substring(2),
-        fileName,
-        fileType: "PDF Report",
-        activityId: activity.id,
-        activityName: activity.name || "Activity Report",
-        downloadDate: new Date().toLocaleDateString(),
-      };
-      
-      // Add to downloaded files
-      addDownloadedFile(downloadItem);
-      toast.success(t("reportDownloaded"));
-      
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const snapshot = canvas.toDataURL('image/jpeg', 0.8);
+      setVideoSnapshots(prev => ({ ...prev, [index]: snapshot }));
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error(t("errorGeneratingPDF"));
+      console.error("Error capturing video snapshot:", error);
     }
   };
+
+  useEffect(() => {
+    activity.media.forEach((mediaUrl, index) => {
+      if (mediaUrl.startsWith('data:video')) {
+        captureVideoSnapshot(mediaUrl, index);
+      }
+    });
+  }, [activity.media]);
 
   return (
     <>
@@ -388,6 +106,15 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
               {activity.name}
             </CardTitle>
             <div className="flex space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowViewDialog(true)}
+                className="h-8 w-8 p-0"
+                title={t("view")}
+              >
+                <Eye size={16} className="text-ngo-dark" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -403,15 +130,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
                 className="h-8 w-8 p-0"
               >
                 <Share2 size={16} className="text-ngo-dark" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={exportToPDF}
-                className="h-8 w-8 p-0"
-                title={t("exportPDF")}
-              >
-                <FileDown size={16} className="text-ngo-dark" />
               </Button>
               <Button
                 variant="ghost"
@@ -513,6 +231,194 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
               {t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-ngo-dark">
+              {activity.name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-8">
+            {/* Basic Information Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-ngo-dark mb-6">Basic Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{t("date")}</p>
+                  <p className="text-base">{format(new Date(activity.date), "PPP 'at' p")}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{t("location")}</p>
+                  <p className="text-base">{activity.location}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-gray-600 mb-1">{t("description")}</p>
+                  <p className="text-base">{activity.description}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{t("personOfContact")}</p>
+                  <p className="text-base">{activity.contactPerson.name}</p>
+                  <p className="text-sm text-gray-600">{activity.contactPerson.contactNo}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Beneficiaries Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-ngo-dark mb-6">Beneficiaries</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activity.beneficiaries.map((beneficiary, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-start space-x-4">
+                      {beneficiary.photo ? (
+                        <img
+                          src={beneficiary.photo}
+                          alt={`${beneficiary.firstName} ${beneficiary.lastName}`}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500 text-xl">
+                            {beneficiary.firstName[0]}{beneficiary.lastName[0]}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h4 className="font-medium mb-2">
+                          {beneficiary.firstName} {beneficiary.middleName} {beneficiary.lastName}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                          <p>{t("gender")}: {beneficiary.gender}</p>
+                          <p>{t("age")}: {beneficiary.age}</p>
+                          <p>{t("contactNo")}: {beneficiary.contactNo}</p>
+                          <p>{t("alternateNo")}: {beneficiary.alternateNo}</p>
+                          <p>Doc Type: Aadhar</p>
+                          <p>UID: {beneficiary.documentNo}</p>
+                          <p>Address: {beneficiary.address}</p>
+                          <p>State: {beneficiary.state}</p>
+                          <p>District: {beneficiary.district}</p>
+                          <p>Tehsil: {beneficiary.tehsil}</p>
+                          <p>Caste: {beneficiary.caste}</p>
+                          <p>Ref Person: {beneficiary.referenceName}</p>
+                          <p>Ref Contact: {beneficiary.referenceContact}</p>
+                        </div>
+                        {beneficiary.comment && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            {t("comments")}: {beneficiary.comment}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Documents and Media Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-ngo-dark mb-6">Documents & Media</h3>
+              
+              {/* Documents Subsection */}
+              <div className="space-y-2">
+                <h4 className="text-lg font-semibold text-ngo-dark mb-4">Documents</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {activity.documents.map((doc, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex flex-col space-y-3">
+                        {doc.preview ? (
+                          doc.type.toLowerCase().includes('pdf') ? (
+                            <div className="w-full h-32 border rounded overflow-hidden">
+                              <iframe
+                                src={doc.preview}
+                                className="w-full h-full"
+                                title={`Document Preview ${index + 1}`}
+                              />
+                            </div>
+                          ) : doc.type.toLowerCase().includes('image') ? (
+                            <div className="w-full h-32 border rounded overflow-hidden">
+                              <img
+                                src={doc.preview}
+                                alt={`Document Preview ${index + 1}`}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-full h-32 flex items-center justify-center bg-gray-100 border rounded">
+                              <FileText className="w-8 h-8 text-gray-400" />
+                            </div>
+                          )
+                        ) : (
+                          <div className="w-full h-32 flex items-center justify-center bg-gray-100 border rounded">
+                            {doc.type.toLowerCase().includes('pdf') ? (
+                              <FileText className="w-8 h-8 text-gray-400" />
+                            ) : doc.type.toLowerCase().includes('image') ? (
+                              <FileImage className="w-8 h-8 text-gray-400" />
+                            ) : doc.type.toLowerCase().includes('video') ? (
+                              <FileVideo className="w-8 h-8 text-gray-400" />
+                            ) : (
+                              <File className="w-8 h-8 text-gray-400" />
+                            )}
+                          </div>
+                        )}
+                        <div className="mt-2">
+                          <p className="font-medium mb-1">{doc.fileName || t("noFileName")}</p>
+                          <p className="text-sm text-gray-600">{t("docType")}: {doc.type}</p>
+                          {doc.comment && (
+                            <p className="text-sm text-gray-600 mt-1">{doc.comment}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Media Files Subsection */}
+              <div className="space-y-2">
+                <h4 className="text-lg font-semibold text-ngo-dark mb-4">{t("mediaFiles")}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {activity.media.map((mediaUrl, index) => (
+                    <div key={index} className="border rounded-lg overflow-hidden">
+                      {mediaUrl.startsWith('data:image') ? (
+                        <img
+                          src={mediaUrl}
+                          alt={`Media ${index + 1}`}
+                          className="w-full h-64 object-cover"
+                        />
+                      ) : (
+                        <div className="relative w-full h-64 bg-gray-100">
+                          {videoSnapshots[index] ? (
+                            <img
+                              src={videoSnapshots[index]}
+                              alt={`Video Snapshot ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-gray-500">Loading...</span>
+                            </div>
+                          )}
+                          <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                            Video
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+              {t("close")}
             </Button>
           </DialogFooter>
         </DialogContent>
