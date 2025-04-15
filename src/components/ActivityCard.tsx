@@ -128,6 +128,28 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
                     border-bottom: 1px solid #000;
                     padding-bottom: 5mm;
                   }
+                  .print-logo {
+                    width: 25mm;
+                    height: auto;
+                    margin-bottom: 3mm;
+                  }
+                  .print-title {
+                    font-size: 24pt;
+                    font-weight: bold;
+                    margin: 3mm 0 2mm;
+                    color: #000;
+                  }
+                  .print-subtitle {
+                    font-size: 12pt;
+                    color: #666;
+                    margin: 0 0 5mm;
+                  }
+                  .print-activity-name {
+                    font-size: 14pt;
+                    font-weight: bold;
+                    color: #000;
+                    margin-top: 5mm;
+                  }
                   .print-section {
                     margin-bottom: 10mm;
                     page-break-inside: avoid;
@@ -191,6 +213,12 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
             </head>
             <body>
               <div class="print-content">
+                <div class="print-header">
+                  <img src="/NGOSaathifavicon.png" alt="NGOSaathi Logo" class="print-logo" />
+                  <h1 class="print-title">NGOSaathi</h1>
+                  <p class="print-subtitle">Activity Report</p>
+                  <h2 class="print-activity-name">${activity.name}</h2>
+                </div>
                 ${printContent.innerHTML}
               </div>
             </body>
