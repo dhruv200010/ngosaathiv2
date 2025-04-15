@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, Eye, FileText, FileImage, FileVideo, File, Download } from "lucide-react";
+import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, Eye, FileText, FileImage, FileVideo, File, Download, User, UserRound } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -290,27 +290,58 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
                         </div>
                       )}
                       <div className="flex-1">
-                        <h4 className="font-medium mb-2">
+                        <h4 className="font-medium mb-2 flex items-center">
                           {beneficiary.firstName} {beneficiary.middleName} {beneficiary.lastName}
+                          <div className="ml-2 flex items-center">
+                            {beneficiary.gender === 'male' ? (
+                              <>
+                                <User 
+                                  size={16} 
+                                  className="text-blue-500" 
+                                />
+                                <span className="ml-1 text-xs text-blue-500">M</span>
+                              </>
+                            ) : beneficiary.gender === 'female' ? (
+                              <>
+                                <UserRound 
+                                  size={16} 
+                                  className="text-pink-500" 
+                                />
+                                <span className="ml-1 text-xs text-pink-500">F</span>
+                              </>
+                            ) : (
+                              <>
+                                <User 
+                                  size={16} 
+                                  className="text-gray-500" 
+                                />
+                                <span className="ml-1 text-xs text-gray-500">O</span>
+                              </>
+                            )}
+                          </div>
                         </h4>
                         <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                          <p>{t("gender")}: {beneficiary.gender}</p>
-                          <p>{t("age")}: {beneficiary.age}</p>
-                          <p>{t("contactNo")}: {beneficiary.contactNo}</p>
-                          <p>{t("alternateNo")}: {beneficiary.alternateNo}</p>
-                          <p>Doc Type: Aadhar</p>
-                          <p>UID: {beneficiary.documentNo}</p>
-                          <p>Address: {beneficiary.address}</p>
-                          <p>State: {beneficiary.state}</p>
-                          <p>District: {beneficiary.district}</p>
-                          <p>Tehsil: {beneficiary.tehsil}</p>
-                          <p>Caste: {beneficiary.caste}</p>
-                          <p>Ref Person: {beneficiary.referenceName}</p>
-                          <p>Ref Contact: {beneficiary.referenceContact}</p>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-bold">gender:</span> {beneficiary.gender}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-bold">DOB:</span> {beneficiary.dateOfBirth ? format(new Date(beneficiary.dateOfBirth), "MMM dd, yyyy") : ""}
+                          </div>
+                          <p><span className="font-bold">{t("contactNo")}</span>: {beneficiary.contactNo}</p>
+                          <p><span className="font-bold">{t("alternateNo")}</span>: {beneficiary.alternateNo}</p>
+                          <p><span className="font-bold">Doc Type</span>: Aadhar</p>
+                          <p><span className="font-bold">UID</span>: {beneficiary.documentNo}</p>
+                          <p><span className="font-bold">Address</span>: {beneficiary.address}</p>
+                          <p><span className="font-bold">State</span>: {beneficiary.state}</p>
+                          <p><span className="font-bold">District</span>: {beneficiary.district}</p>
+                          <p><span className="font-bold">Tehsil</span>: {beneficiary.tehsil}</p>
+                          <p><span className="font-bold">Caste</span>: {beneficiary.caste}</p>
+                          <p><span className="font-bold">Ref Person</span>: {beneficiary.referenceName}</p>
+                          <p><span className="font-bold">Ref Contact</span>: {beneficiary.referenceContact}</p>
                         </div>
                         {beneficiary.comment && (
                           <p className="text-sm text-gray-600 mt-2">
-                            {t("comments")}: {beneficiary.comment}
+                            <span className="font-bold">{t("comments")}</span>: {beneficiary.comment}
                           </p>
                         )}
                       </div>
@@ -381,7 +412,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
 
               {/* Media Files Subsection */}
               <div className="space-y-2">
-                <h4 className="text-lg font-semibold text-ngo-dark mb-4">{t("mediaFiles")}</h4>
+                <h4 className="text-lg font-semibold text-ngo-dark mb-4">Media Files</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {activity.media.map((mediaUrl, index) => (
                     <div key={index} className="border rounded-lg overflow-hidden">

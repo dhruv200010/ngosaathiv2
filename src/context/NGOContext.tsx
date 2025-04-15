@@ -46,7 +46,7 @@ export interface Beneficiary {
   lastName: string;
   gender: "female" | "male" | "other";
   caste: "general" | "obc" | "scst" | "ews" | "other";
-  age: string;
+  dateOfBirth: string;
   comment: string;
   contactNo: string;
   alternateNo: string;

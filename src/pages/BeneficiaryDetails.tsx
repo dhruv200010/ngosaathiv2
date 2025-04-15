@@ -7,6 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, getYear, setYear } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useLanguage } from "@/context/LanguageContext";
@@ -336,14 +340,71 @@ const BeneficiaryDetails = () => {
                             </div>
                             <div>
                               <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                {t("Age")}
+                                {t("Date of Birth")}
                               </Label>
-                              <Input
-                                type="number"
-                                value={ben.age}
-                                onChange={(e) => updateBeneficiaryInTemp(ben.id, { age: e.target.value })}
-                                placeholder={t("age")}
-                              />
+                              <div className="flex gap-2">
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={`w-[100px] justify-start text-left font-normal ${
+                                        !ben.dateOfBirth && "text-muted-foreground"
+                                      }`}
+                                    >
+                                      <CalendarIcon className="mr-2 h-4 w-4" />
+                                      {ben.dateOfBirth ? (
+                                        format(new Date(ben.dateOfBirth), "MMM dd")
+                                      ) : (
+                                        <span>{t("Date")}</span>
+                                      )}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                      mode="single"
+                                      selected={ben.dateOfBirth ? new Date(ben.dateOfBirth) : undefined}
+                                      onSelect={(date) => 
+                                        updateBeneficiaryInTemp(ben.id, { 
+                                          dateOfBirth: date ? date.toISOString() : "" 
+                                        })
+                                      }
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <Select
+                                  value={ben.dateOfBirth ? getYear(new Date(ben.dateOfBirth)).toString() : ""}
+                                  onValueChange={(year) => {
+                                    if (ben.dateOfBirth) {
+                                      const currentDate = new Date(ben.dateOfBirth);
+                                      const newDate = setYear(currentDate, parseInt(year));
+                                      updateBeneficiaryInTemp(ben.id, { 
+                                        dateOfBirth: newDate.toISOString() 
+                                      });
+                                    } else {
+                                      const newDate = new Date();
+                                      newDate.setFullYear(parseInt(year));
+                                      updateBeneficiaryInTemp(ben.id, { 
+                                        dateOfBirth: newDate.toISOString() 
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className="w-[100px]">
+                                    <SelectValue placeholder={t("Year")} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 100 }, (_, i) => {
+                                      const year = new Date().getFullYear() - i;
+                                      return (
+                                        <SelectItem key={year} value={year.toString()}>
+                                          {year}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
                           </div>
                           

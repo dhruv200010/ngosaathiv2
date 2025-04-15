@@ -89,7 +89,7 @@ export const getDefaultBeneficiary = (): Beneficiary => {
     lastName: "",
     gender: "female",
     caste: "general",
-    age: "",
+    dateOfBirth: "",
     comment: "",
     contactNo: "",
     alternateNo: "",
