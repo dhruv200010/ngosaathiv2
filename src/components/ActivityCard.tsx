@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, Eye, FileText, FileImage, FileVideo, File, Download, User, UserRound } from "lucide-react";
+import { Edit2, Trash2, Share2, ChevronDown, ChevronUp, Eye, FileText, FileImage, FileVideo, File, Download, User, UserRound, Printer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -96,6 +96,115 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
       }
     });
   }, [activity.media]);
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const printContent = document.querySelector('.print-content');
+      if (printContent) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>${activity.name} - Print View</title>
+              <style>
+                @media print {
+                  body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.5;
+                    width: 210mm;
+                    height: 297mm;
+                    margin: 0;
+                    padding: 0;
+                  }
+                  .print-content {
+                    width: 210mm;
+                    height: 297mm;
+                    padding: 20mm;
+                    box-sizing: border-box;
+                  }
+                  .print-header {
+                    text-align: center;
+                    margin-bottom: 10mm;
+                    border-bottom: 1px solid #000;
+                    padding-bottom: 5mm;
+                  }
+                  .print-section {
+                    margin-bottom: 10mm;
+                    page-break-inside: avoid;
+                  }
+                  .print-section-title {
+                    font-size: 14pt;
+                    font-weight: bold;
+                    margin-bottom: 5mm;
+                    color: #000;
+                  }
+                  .print-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 5mm;
+                  }
+                  .print-item {
+                    border: 0.5pt solid #ddd;
+                    padding: 3mm;
+                    border-radius: 2mm;
+                    page-break-inside: avoid;
+                  }
+                  .print-label {
+                    font-weight: bold;
+                    color: #666;
+                    font-size: 10pt;
+                  }
+                  .print-media {
+                    max-width: 100%;
+                    height: auto;
+                    max-height: 50mm;
+                  }
+                  img {
+                    max-width: 100%;
+                    height: auto;
+                    max-height: 50mm;
+                  }
+                  @page {
+                    size: A4;
+                    margin: 0;
+                  }
+                  .print-beneficiary {
+                    page-break-inside: avoid;
+                    margin-bottom: 5mm;
+                  }
+                  .print-beneficiary-photo {
+                    width: 30mm;
+                    height: 30mm;
+                    object-fit: cover;
+                    border-radius: 15mm;
+                  }
+                  .print-document {
+                    page-break-inside: avoid;
+                    margin-bottom: 5mm;
+                  }
+                  .print-document-preview {
+                    max-height: 40mm;
+                    object-fit: contain;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="print-content">
+                ${printContent.innerHTML}
+              </div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 1000);
+      }
+    }
+  };
 
   return (
     <>
@@ -239,30 +348,41 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-ngo-dark">
-              {activity.name}
-            </DialogTitle>
+            <div className="flex justify-between items-center">
+              <DialogTitle className="text-2xl font-bold text-ngo-dark">
+                {activity.name}
+              </DialogTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="flex items-center gap-2"
+              >
+                <Printer size={16} />
+                {t("print")}
+              </Button>
+            </div>
           </DialogHeader>
           
-          <div className="space-y-8">
+          <div className="space-y-8 print-content">
             {/* Basic Information Section */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold text-ngo-dark mb-6">Basic Information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{t("date")}</p>
+            <div className="space-y-4 print-section">
+              <h3 className="text-xl font-bold text-ngo-dark mb-6 print-section-title">Basic Information</h3>
+              <div className="grid grid-cols-2 gap-4 print-grid">
+                <div className="print-item">
+                  <p className="text-sm font-medium text-gray-600 mb-1 print-label">{t("date")}</p>
                   <p className="text-base">{format(new Date(activity.date), "PPP 'at' p")}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{t("location")}</p>
+                <div className="print-item">
+                  <p className="text-sm font-medium text-gray-600 mb-1 print-label">{t("location")}</p>
                   <p className="text-base">{activity.location}</p>
                 </div>
-                <div className="col-span-2">
-                  <p className="text-sm font-medium text-gray-600 mb-1">{t("description")}</p>
+                <div className="col-span-2 print-item">
+                  <p className="text-sm font-medium text-gray-600 mb-1 print-label">{t("description")}</p>
                   <p className="text-base">{activity.description}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{t("personOfContact")}</p>
+                <div className="print-item">
+                  <p className="text-sm font-medium text-gray-600 mb-1 print-label">{t("personOfContact")}</p>
                   <p className="text-base">{activity.contactPerson.name}</p>
                   <p className="text-sm text-gray-600">{activity.contactPerson.contactNo}</p>
                 </div>
@@ -270,11 +390,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
             </div>
 
             {/* Beneficiaries Section */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold text-ngo-dark mb-6">Beneficiaries</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4 print-section">
+              <h3 className="text-xl font-bold text-ngo-dark mb-6 print-section-title">Beneficiaries</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid">
                 {activity.beneficiaries.map((beneficiary, index) => (
-                  <div key={index} className="border rounded-lg p-4 space-y-2">
+                  <div key={index} className="border rounded-lg p-4 space-y-2 print-item">
                     <div className="flex items-start space-x-4">
                       {beneficiary.photo ? (
                         <img
@@ -290,9 +410,9 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
                         </div>
                       )}
                       <div className="flex-1">
-                        <h4 className="font-medium mb-2 flex items-center">
-                          {beneficiary.firstName} {beneficiary.middleName} {beneficiary.lastName}
-                          <div className="ml-2 flex items-center">
+                        <h4 className="font-medium mb-2 flex items-center justify-between">
+                          <span>{beneficiary.firstName} {beneficiary.middleName} {beneficiary.lastName}</span>
+                          <div className="flex items-center">
                             {beneficiary.gender === 'male' ? (
                               <>
                                 <User 
@@ -352,15 +472,15 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
             </div>
 
             {/* Documents and Media Section */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold text-ngo-dark mb-6">Documents & Media</h3>
+            <div className="space-y-4 print-section">
+              <h3 className="text-xl font-bold text-ngo-dark mb-6 print-section-title">Documents & Media</h3>
               
               {/* Documents Subsection */}
-              <div className="space-y-2">
-                <h4 className="text-lg font-semibold text-ngo-dark mb-4">Documents</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 print-section">
+                <h4 className="text-lg font-semibold text-ngo-dark mb-4 print-section-title">Documents</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid">
                   {activity.documents.map((doc, index) => (
-                    <div key={index} className="border rounded-lg p-4">
+                    <div key={index} className="border rounded-lg p-4 print-item">
                       <div className="flex flex-col space-y-3">
                         {doc.preview ? (
                           doc.type.toLowerCase().includes('pdf') ? (
@@ -411,11 +531,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onEdit, onDownloa
               </div>
 
               {/* Media Files Subsection */}
-              <div className="space-y-2">
-                <h4 className="text-lg font-semibold text-ngo-dark mb-4">Media Files</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 print-section">
+                <h4 className="text-lg font-semibold text-ngo-dark mb-6 print-section-title">Media Files</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid">
                   {activity.media.map((mediaUrl, index) => (
-                    <div key={index} className="border rounded-lg overflow-hidden">
+                    <div key={index} className="border rounded-lg overflow-hidden print-item">
                       {mediaUrl.startsWith('data:image') ? (
                         <img
                           src={mediaUrl}
